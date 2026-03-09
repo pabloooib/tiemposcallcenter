@@ -1,365 +1,686 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>TIEMPO DE AGENTES</title>
-<style>
-  :root{
-    --bg:#0b0f14;
-    --panel:#111826;
-    --accent:#00d2ff;
-    --ok:#28c76f;
-    --warn:#ffcc00;
-    --danger:#ff4d4f;
-    --muted:#8aa0b3;
-    --chip:#162233;
-    --chip2:#13314a;
-    --white:#eaf1f6;
-  }
-  *{box-sizing:border-box}
-  html,body{height:100%}
-  body{
-    margin:0;
-    font-family: system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, Noto Sans, "Helvetica Neue", Arial;
-    background: radial-gradient(1200px 700px at 20% -10%, #0e1828, #0b0f14 60%) fixed;
-    color:var(--white);
-  }
+    <meta charset="UTF-8">
+    <title>EIS</title>
+    <link rel="icon" href="https://cdn-icons-png.flaticon.com/128/1302/1302539.png" type="image/png">
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #0f172a;
+            color: #f1f5f9;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+            min-height: 95vh;
+            margin: 0;
+            padding: 10px;
+        }
 
-  /* Header */
-  .topbar{
-    position:sticky; top:0; z-index:5;
-    backdrop-filter: blur(10px);
-    background: linear-gradient(180deg, rgba(11,15,20,.9), rgba(11,15,20,.6));
-    border-bottom:1px solid #1f2b3a;
-    padding:14px 18px;
-    display:flex; gap:16px; align-items:center; justify-content:space-between; flex-wrap:wrap;
-  }
-  .title{font-weight:700; letter-spacing:.3px; font-size: clamp(18px, 2vw, 22px)}
-  .badges{display:flex; gap:10px; flex-wrap:wrap}
-  .badge{
-    background:var(--chip);
-    color:var(--muted);
-    padding:8px 12px; border-radius:999px; display:flex; align-items:center; gap:8px;
-    border:1px solid #203247; font-size:13px;
-  }
-  .dot{width:8px; height:8px; border-radius:50%}
-  .dot.ok{background:var(--ok)}
-  .dot.busy{background:var(--warn)}
-  .help{color:var(--muted); font-size:12px}
+        h1 {
+            text-align: center;
+            margin-bottom: 12px;
+            font-size: 30px;
+            font-weight: 700;
+            color: #fff;
+        }
 
-  /* Grid */
-  .grid{
-    display:grid;
-    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-    gap:16px;
-    padding:18px;
-    max-width:1400px; margin:0 auto;
-  }
+        .contenedor {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 10px;
+            justify-content: center;
+            align-items: start;
+            width: 100%;
+            max-width: 1400px;
+        }
 
-  /* Card */
-  .card{
-    background: linear-gradient(180deg, #111826, #0f1521 60%);
-    border:1px solid #1f2b3a;
-    border-radius:16px;
-    padding:14px;
-    box-shadow: 0 10px 20px rgba(0,0,0,.3), inset 0 1px 0 rgba(255,255,255,.02);
-    position:relative; overflow:hidden;
-    transition:transform .2s ease, box-shadow .2s ease, border-color .2s ease;
-  }
-  .card:hover{ transform: translateY(-2px); box-shadow: 0 14px 26px rgba(0,0,0,.35) }
-  .name{
-    font-weight:800;
-    letter-spacing:.3px;
-    margin-bottom:8px;
-    font-size:18px;
-  }
-  .state{
-    display:inline-flex; gap:8px; align-items:center;
-    background:linear-gradient(180deg,#08212e,#051820);
-    border:1px solid #123149;
-    color:#a5d7ff; font-weight:700;
-    padding:6px 10px; border-radius:999px; font-size:12px;
-  }
-  .rows{margin-top:10px; display:grid; gap:8px}
-  .row{
-    display:flex; align-items:center; justify-content:space-between;
-    background:var(--chip2); border:1px solid #1b2e43; color:#9ab3c8;
-    padding:8px 10px; border-radius:12px;
-  }
-  .row strong{color:#cde5ff; font-weight:700}
-  .row .time{
-    font-variant-numeric: tabular-nums;
-    font-weight:700; color:#e8f4ff;
-  }
+        .tarjeta {
+            position: relative;
+            background: #1e293b;
+            border-radius: 12px;
+            padding: 12px 8px;
+            text-align: center;
+            box-shadow: 0 3px 6px rgba(0, 0, 0, 0.35);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            transition: transform 0.15s ease, box-shadow 0.2s ease;
+            cursor: pointer;
+            overflow: visible;
+        }
 
-  /* Buttons */
-  .actions{ display:flex; gap:8px; margin-top:10px }
-  .btn{
-    flex:1; cursor:pointer; border:none;
-    background:linear-gradient(180deg,#0c2b3c,#0a2230);
-    color:#cfe9ff; padding:10px 12px; border-radius:12px;
-    border:1px solid #1f3a51; font-weight:800;
-    display:flex; align-items:center; justify-content:center; gap:8px;
-    transition: filter .15s ease, transform .05s ease, border-color .2s ease;
-  }
-  .btn:active{ transform: scale(.98) }
-  .btn[data-active="true"]{ 
-    background:linear-gradient(180deg,#073e56,#072d41);
-    border-color:#2e6b93; 
-    color:#e7f6ff;
-    box-shadow:0 0 0 2px rgba(0,210,255,.15) inset;
-  }
-  .btn.banio[data-active="true"]{ box-shadow:0 0 0 2px rgba(255,204,0,.18) inset }
-  .btn.almuerzo[data-active="true"]{ box-shadow:0 0 0 2px rgba(0,210,255,.18) inset }
+        .tarjeta:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 14px rgba(0, 0, 0, 0.45);
+        }
 
-  /* Alert styles */
-  .limit{ color:var(--warn) }
-  .over{ color:var(--danger) }
-  .pulse-danger{
-    position:absolute; inset:-1px; border-radius:16px; pointer-events:none;
-    box-shadow: 0 0 0 0 rgba(255,77,79,.35); animation: pulse 1.2s infinite;
-  }
-  @keyframes pulse{
-    0%{ box-shadow: 0 0 0 0 rgba(255,77,79,.45) }
-    70%{ box-shadow: 0 0 0 16px rgba(255,77,79,0) }
-    100%{ box-shadow: 0 0 0 0 rgba(255,77,79,0) }
-  }
+        .flip {
+            position: relative;
+            width: 100%;
+            height: 100%;
+        }
 
-  /* Footer help */
-  footer{padding:8px 18px 24px; color:var(--muted); font-size:12px; text-align:center}
-  code{background:#101826; border:1px solid #1e2b3a; padding:2px 6px; border-radius:6px; color:#bfe2ff}
-</style>
+        .frontal,
+        .trasera {
+            backface-visibility: hidden;
+            transition: opacity 0.3s ease;
+            width: 100%;
+        }
+
+        .frontal.active {
+            opacity: 1;
+            z-index: 2;
+            position: relative;
+        }
+
+        .frontal {
+            opacity: 0;
+            position: absolute;
+            top: 0;
+            left: 0;
+        }
+
+        .trasera.active {
+            opacity: 1;
+            z-index: 2;
+            position: relative;
+        }
+
+        .trasera {
+            opacity: 0;
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            max-height: 132px;
+        }
+
+        .nombre {
+            font-size: 20px;
+            font-weight: 600;
+            margin-bottom: 6px;
+            color: #fff;
+        }
+
+        .estado {
+            display: inline-block;
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 6px;
+            padding: 5px 12px;
+            border-radius: 9999px;
+            text-align: center;
+            color: #fff;
+        }
+
+        .estado.libre {
+            background: #16a34a;
+        }
+
+        .estado.ocupado {
+            background: #facc15;
+            color: #1e293b;
+            animation: pulse 1.2s infinite;
+        }
+
+        .estado.excedido {
+            background: #ef4444;
+            color: #fff;
+            animation: pulse 1.2s infinite;
+        }
+
+        @keyframes pulse {
+            0% {
+                transform: scale(1);
+            }
+
+            50% {
+                transform: scale(1.05);
+            }
+
+            100% {
+                transform: scale(1);
+            }
+        }
+
+        .tiempo {
+            font-size: 14px;
+            margin: 2px 0;
+            color: #fff;
+            font-weight: 500;
+        }
+
+        .tiempo span.cronometro {
+            color: #facc15;
+            font-weight: 700;
+        }
+
+        .menu-radial {
+            position: fixed;
+            transform: translate(-50%, -50%) scale(0);
+            transition: transform 0.25s ease;
+            pointer-events: none;
+            z-index: 2000;
+        }
+
+        .menu-radial.active {
+            transform: translate(-50%, -50%) scale(1);
+            pointer-events: auto;
+        }
+
+        .menu-radial button {
+            position: absolute;
+            width: 55px;
+            height: 55px;
+            border: none;
+            border-radius: 25%;
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+            font-size: 25px;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            box-shadow: 0 0 8px rgba(0, 0, 0, 0.4);
+        }
+
+        .menu-radial button:hover {
+            transform: scale(1.15);
+            box-shadow: 0 0 14px rgba(0, 0, 0, 0.6);
+        }
+
+        .btn-libre {
+            background: #22c55e;
+            top: -55px;
+            left: -20px;
+            box-shadow: 0 0 14px rgba(34, 197, 94, 0.8);
+        }
+
+        .btn-banio {
+            background: #facc15;
+            color: #1e293b;
+            top: 15px;
+            left: -65px;
+            font-size: 14px;
+            box-shadow: 0 0 10px rgba(253, 224, 71, 0.8);
+        }
+
+        .btn-almuerzo {
+            background: #facc15;
+            top: 15px;
+            left: 25px;
+            box-shadow: 0 0 10px rgba(59, 130, 246, 0.8);
+        }
+
+        .tarjeta.dimmed {
+            filter: brightness(0.5);
+            transform: scale(0.97);
+        }
+
+        .icon-telefono {
+            position: absolute;
+            top: 0px;
+            right: 5px;
+            cursor: pointer;
+            font-size: 20px;
+            z-index: 3;
+        }
+
+        .regresar {
+            position: relative;
+            top: 0px;
+            right: -70px;
+            cursor: pointer;
+            font-size: 20px;
+            z-index: 3;
+        }
+
+
+        .registro {
+            display: flex;
+            flex-direction: column;
+            gap: 3px;
+            margin-top: 10px;
+            width: 100%;
+        }
+
+        .registro input,
+        .registro select {
+            padding: 4px;
+            border-radius: 6px;
+            border: none;
+            width: 100%;
+            height: 23px;
+            box-sizing: border-box;
+            font-size: 14px;
+        }
+
+        .botones {
+            display: flex;
+            justify-content: center;
+            gap: 12px;
+            margin-top: 5px;
+        }
+
+        .botones button {
+            width: 35px;
+            height: 35px;
+            border: none;
+            border-radius: 50%;
+            font-size: 20px;
+            cursor: pointer;
+            padding: 4px;
+        }
+
+        .btn-check {
+            background: #16a34a;
+            color: white;
+        }
+
+        .btn-x {
+            background: #ef4444;
+            color: white;
+        }
+
+        .estadisticas {
+            font-size: 12px;
+            margin-top: 4px;
+            color: #f1f5f9;
+            font-weight: 500;
+        }
+    </style>
 </head>
+
 <body>
-  <header class="topbar">
-    <div class="title">🕒 CONTROL DE TIEMPOS CALL CENTER :)</div>
-    <div class="badges">
-      <div class="badge"><span class="dot ok"></span><span id="banioBadge">Baño libre</span></div>
-      <div class="badge"><span class="dot busy"></span> Límite baño: 15:00</div>
-      <div class="badge"><span class="dot busy"></span> Límite almuerzo: 60:00</div>
-    </div>
-    <div class="help">Tip: clic en <b>Baño</b> o <b>Almuerzo</b> para iniciar / terminar.</div>
-  </header>
+    <h1>Executive Information Systems</h1>
+    <br>
+    <div class="contenedor" id="contenedor"></div>
 
-  <main class="grid" id="grid"></main>
-
-  <footer>
-    Reglas: solo <b>un</b> agente puede estar en <b>baño</b> simultáneamente.
-    Se reinicia automáticamente a medianoche.  
-    (Un solo archivo <code>.html</code>).
-  </footer>
-
-<script>
-/* =================== Datos de agentes =================== */
-const AGENTES = [
-  "Pablo","Daniel","Andres","Rafael","Alejandro",
-  "Jacky","Tania","Marta","Nestor","Sarai","Michi",
-  "Evelyn","Merlin","Irene"
-];
-
-/* ====== Configuración de límites (segundos) ====== */
-const LIMITE_BANIO = 15 * 60;     // 15 minutos
-const LIMITE_ALMUERZO = 60 * 60;  // 60 minutos
-
-/* ====== Estado global ====== */
-const estado = {}; // { nombre: {banio:{activo, inicio, transcurrido, alertado}, almuerzo:{...}} }
-let usuarioEnBanio = null;        // nombre del agente que está en baño (único)
-
-/* ====== Utilidades ====== */
-const $ = (sel, ctx=document) => ctx.querySelector(sel);
-function fmt(seg) {
-  seg = Math.max(0, Math.floor(seg));
-  const m = Math.floor(seg/60).toString().padStart(2,'0');
-  const s = (seg%60).toString().padStart(2,'0');
-  return `${m}:${s}`;
-}
-function beep(){
-  try{
-    const ctx = new (window.AudioContext||window.webkitAudioContext)();
-    const o = ctx.createOscillator(); const g = ctx.createGain();
-    o.connect(g); g.connect(ctx.destination);
-    o.type = "square"; o.frequency.setValueAtTime(880, ctx.currentTime);
-    g.gain.setValueAtTime(0.08, ctx.currentTime);
-    o.start(); g.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime+0.25);
-    o.stop(ctx.currentTime+0.26);
-    setTimeout(()=>ctx.close(),400);
-  }catch(e){}
-}
-
-/* ====== Render ====== */
-const grid = $("#grid");
-
-function tarjetaHTML(nombre){
-  return `
-  <section class="card" data-user="${nombre}">
-    <div class="name">${nombre}</div>
-    <div class="state"><span>Estado:</span><span class="estado-text">Libre</span></div>
-
-    <div class="rows">
-      <div class="row">
-        <span>🚻 <strong>Baño</strong></span>
-        <span class="time" data-k="banio">00:00</span>
-      </div>
-      <div class="row">
-        <span>🍽️ <strong>Almuerzo</strong></span>
-        <span class="time" data-k="almuerzo">00:00</span>
-      </div>
+    <!-- menú flotante -->
+    <div id="menuGlobal" class="menu-radial" aria-hidden="true">
+        <button class="btn-libre" title="Marcar Libre">✔</button>
+        <button class="btn-banio" title="Marcar Baño">🚻</button>
+        <button class="btn-almuerzo" title="Marcar Almuerzo">🍔</button>
     </div>
 
-    <div class="actions">
-      <button class="btn banio" data-k="banio" title="Iniciar/Terminar baño">🚻 Baño</button>
-      <button class="btn almuerzo" data-k="almuerzo" title="Iniciar/Terminar almuerzo">🍽️ Almuerzo</button>
-    </div>
-    <div class="pulse-danger" hidden></div>
-  </section>`;
-}
+    <script type="module">
+import { 
+  initializeApp 
+} from "https://www.gstatic.com/firebasejs/9.22.2/firebase-app.js";
 
-function construirUI(){
-  grid.innerHTML = AGENTES.map(tarjetaHTML).join("");
-  AGENTES.forEach(nombre=>{
-    estado[nombre] = {
-      banio: {activo:false, inicio:0, transcurrido:0, alertado:false},
-      almuerzo: {activo:false, inicio:0, transcurrido:0, alertado:false},
-    };
+import { 
+  getFirestore, doc, setDoc, updateDoc, onSnapshot, collection, query, where, 
+  getDocs, addDoc, serverTimestamp, deleteDoc 
+} from "https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore.js";
+
+import * as XLSX from "https://cdn.jsdelivr.net/npm/xlsx@0.18.5/+esm";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyDeAbygOcoV1G9Zh8wd7topjXttlmJ892Y",
+  authDomain: "workplace-18675.firebaseapp.com",
+  projectId: "workplace-18675",
+  storageBucket: "workplace-18675.appspot.com",
+  messagingSenderId: "606737102100",
+  appId: "1:606737102100:web:7084120bdabf1f8ca2be01"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
+const nombres = ["Nestor", "Daniel", "Andres", "Rafael", "Alejandro", "Tania", "Marta", "Pablo", "Saraí", "Michi", "Evelyn", "Merlin", "Ashley", "Gabriela","Bryan","Diego","Jorge","Joselyne","Andrea","Omar","Javier","Synndy","Anthony","Mildred","Madelin","Majo","Monica","Jackeline",];
+const LIMITE = { baño: 15 * 60, almuerzo: 60 * 60 };
+const refBanio = doc(db, "banos", "estado");
+const contenedor = document.getElementById("contenedor");
+const tarjetas = {};
+const menuGlobal = document.getElementById("menuGlobal");
+let tarjetaActiva = null;
+
+// --- CREAR TARJETAS ---
+nombres.forEach(nombre => {
+  const tarjeta = document.createElement("div");
+  tarjeta.className = "tarjeta";
+
+  const flip = document.createElement("div");
+  flip.className = "flip";
+
+  const frontal = document.createElement("div");
+  frontal.className = "frontal active";
+
+  const spanNombre = document.createElement("div");
+  spanNombre.className = "nombre";
+  spanNombre.textContent = nombre;
+
+  const estado = document.createElement("div");
+  estado.className = "estado libre";
+  estado.textContent = "Libre";
+
+  const tiempoBanio = document.createElement("div");
+  tiempoBanio.className = "tiempo";
+  tiempoBanio.innerHTML = `Baño: <span class="cronometro">0:00</span>`;
+
+  const tiempoAlmuerzo = document.createElement("div");
+  tiempoAlmuerzo.className = "tiempo";
+  tiempoAlmuerzo.innerHTML = `Almuerzo: <span class="cronometro">0:00</span>`;
+
+  const estadisticas = document.createElement("div");
+  estadisticas.className = "estadisticas";
+  estadisticas.textContent = "Llamadas: 0 | ✅:0 | ❌:0";
+
+  const iconTelefono = document.createElement("div");
+  iconTelefono.className = "icon-telefono";
+  iconTelefono.textContent = "📞";
+
+  frontal.append(spanNombre, estado, tiempoBanio, tiempoAlmuerzo, estadisticas, iconTelefono);
+
+  const trasera = document.createElement("div");
+  trasera.className = "trasera";
+
+  const iconBanio = document.createElement("div");
+  iconBanio.className = "regresar";
+  iconBanio.textContent = "🚻";
+
+  const registro = document.createElement("div");
+  registro.className = "registro";
+
+  const inputNumero = document.createElement("input");
+  inputNumero.placeholder = "Número de teléfono";
+
+  const selectCant = document.createElement("select");
+  ["1", "2"].forEach(val => {
+    const opt = document.createElement("option");
+    opt.value = val; 
+    opt.text = val + " llamada" + (val === "2" ? "s" : "");
+    selectCant.appendChild(opt);
   });
 
-  grid.addEventListener("click", (ev)=>{
-    const btn = ev.target.closest(".btn");
-    if(!btn) return;
-    const card = ev.target.closest(".card");
-    const nombre = card.dataset.user;
-    const tipo = btn.dataset.k; // "banio" o "almuerzo"
-    toggle(nombre, tipo);
+  const botones = document.createElement("div");
+  botones.className = "botones";
+  const btnCheck = document.createElement("button"); 
+  btnCheck.className = "btn-check"; 
+  btnCheck.textContent = "✅";
+  const btnX = document.createElement("button"); 
+  btnX.className = "btn-x"; 
+  btnX.textContent = "❌";
+  botones.append(btnX, btnCheck);
+
+  registro.append(inputNumero, selectCant, botones);
+  trasera.append(iconBanio, registro);
+  flip.append(frontal, trasera);
+  tarjeta.appendChild(flip);
+  contenedor.appendChild(tarjeta);
+
+  tarjetas[nombre] = { estado, tiempoBanio, tiempoAlmuerzo, info: {}, estadisticas, frontal, trasera, inputNumero, selectCant, btnCheck, btnX };
+
+  iconTelefono.onclick = e => {
+    e.stopPropagation();
+    frontal.classList.remove("active");
+    trasera.classList.add("active");
+  };
+  iconBanio.onclick = e => {
+    e.stopPropagation();
+    trasera.classList.remove("active");
+    frontal.classList.add("active");
+  };
+
+  btnCheck.onclick = () => registrarLlamada(nombre, true);
+  btnX.onclick = () => registrarLlamada(nombre, false);
+
+  registro.addEventListener("click", e => { e.stopPropagation(); });
+
+  tarjeta.addEventListener("click", (e) => {
+    e.stopPropagation();
+    if (trasera.classList.contains("active")) return;
+    document.querySelectorAll(".tarjeta").forEach(t => t.classList.remove("dimmed"));
+    menuGlobal.classList.remove("active");
+    const rect = tarjeta.getBoundingClientRect();
+    menuGlobal.style.top = `${rect.top + rect.height / 2}px`;
+    menuGlobal.style.left = `${rect.left + rect.width / 2}px`;
+    tarjeta.classList.add("dimmed");
+    tarjetaActiva = nombre;
+    menuGlobal.classList.add("active");
+    menuGlobal.setAttribute("aria-hidden", "false");
   });
+});
+
+// --- Cerrar menu ---
+document.addEventListener("click", () => {
+  menuGlobal.classList.remove("active");
+  menuGlobal.setAttribute("aria-hidden", "true");
+  document.querySelectorAll(".tarjeta").forEach(t => t.classList.remove("dimmed"));
+  tarjetaActiva = null;
+});
+
+// --- Botones menu ---
+menuGlobal.querySelector(".btn-libre").onclick = () => accionMenu(tarjetaActiva, null);
+menuGlobal.querySelector(".btn-banio").onclick = () => accionMenu(tarjetaActiva, "baño");
+menuGlobal.querySelector(".btn-almuerzo").onclick = () => accionMenu(tarjetaActiva, "almuerzo");
+
+async function accionMenu(nombre, tipo) {
+  if (!nombre) return;
+  await toggleEstado(nombre, tipo);
 }
 
-/* ====== Lógica principal ====== */
-function toggle(nombre, tipo){
-  const reg = estado[nombre][tipo];
-
-  // Reglas de exclusividad para baño
-  if(tipo==="banio"){
-    if(!reg.activo && usuarioEnBanio && usuarioEnBanio!==nombre){
-      alert(`⚠️ Solo una persona en baño.\nActualmente: ${usuarioEnBanio}`);
-      beep();
-      return;
-    }
-  }
-
-  reg.activo = !reg.activo;
-  reg.alertado = false;
-  if(reg.activo){
-    reg.inicio = Date.now() - reg.transcurrido*1000; // reanudar si estaba pausado
-    if(tipo==="banio") usuarioEnBanio = nombre;
-  }else{
-    reg.transcurrido = Math.floor((Date.now() - reg.inicio)/1000);
-    if(tipo==="banio" && usuarioEnBanio===nombre) usuarioEnBanio = null;
-  }
-  pintar(nombre);
-  actualizarBadgeBanio();
-}
-
-function actualizar(){
+// --- Cambiar estado ---
+async function toggleEstado(nombre, tipo) {
+  if (!nombre) return;
+  const info = tarjetas[nombre].info || { tipo: null, inicio: null, tiempoBanio: 0, tiempoAlmuerzo: 0 };
   const ahora = Date.now();
-  for(const nombre of AGENTES){
-    for(const tipo of ["banio","almuerzo"]){
-      const reg = estado[nombre][tipo];
-      if(reg.activo){
-        reg.transcurrido = Math.floor((ahora - reg.inicio)/1000);
-      }
+  const inicioMs = (val) => {
+    if (!val && val !== 0) return null;
+    if (typeof val === "number") return val;
+    if (val.toMillis) return val.toMillis();
+    return null;
+  };
+
+  if (info.tipo) {
+    const ini = inicioMs(info.inicio);
+    const segs = ini ? Math.floor((ahora - ini) / 1000) : 0;
+    let acBanio = info.tiempoBanio;
+    let acAlmuerzo = info.tiempoAlmuerzo;
+    if (info.tipo === "baño") acBanio += segs;
+    if (info.tipo === "almuerzo") acAlmuerzo += segs;
+    if (tipo === info.tipo || tipo === null) {
+      await updateDoc(refBanio, { [nombre]: { tipo: null, inicio: null, tiempoBanio: acBanio, tiempoAlmuerzo: acAlmuerzo } });
+    } else {
+      await updateDoc(refBanio, { [nombre]: { tipo: tipo, inicio: ahora, tiempoBanio: acBanio, tiempoAlmuerzo: acAlmuerzo } });
     }
-    pintar(nombre);
+  } else {
+    if (!tipo) return;
+    await updateDoc(refBanio, { [nombre]: { tipo: tipo, inicio: ahora, tiempoBanio: info.tiempoBanio, tiempoAlmuerzo: info.tiempoAlmuerzo } });
   }
 }
 
-function pintar(nombre){
-  const card = grid.querySelector(`.card[data-user="${CSS.escape(nombre)}"]`);
-  if(!card) return;
-
-  const b = estado[nombre].banio;
-  const a = estado[nombre].almuerzo;
-
-  // tiempos
-  card.querySelector('.time[data-k="banio"]').textContent = fmt(b.transcurrido);
-  card.querySelector('.time[data-k="almuerzo"]').textContent = fmt(a.transcurrido);
-
-  // estado principal
-  const estadoTxt = card.querySelector(".estado-text");
-  if(b.activo) estadoTxt.textContent = "En baño";
-  else if(a.activo) estadoTxt.textContent = "En almuerzo";
-  else estadoTxt.textContent = "Libre";
-
-  // botones activos
-  const btnB = card.querySelector('.btn.banio');
-  const btnA = card.querySelector('.btn.almuerzo');
-  btnB.dataset.active = String(b.activo);
-  btnA.dataset.active = String(a.activo);
-
-  // color por límites
-  const tb = card.querySelector('.time[data-k="banio"]');
-  const ta = card.querySelector('.time[data-k="almuerzo"]');
-
-  tb.classList.toggle('limit', b.transcurrido>=LIMITE_BANIO && b.transcurrido<LIMITE_BANIO+60);
-  tb.classList.toggle('over',  b.transcurrido>=LIMITE_BANIO);
-  ta.classList.toggle('limit', a.transcurrido>=LIMITE_ALMUERZO && a.transcurrido<LIMITE_ALMUERZO+60);
-  ta.classList.toggle('over',  a.transcurrido>=LIMITE_ALMUERZO);
-
-  // Anillo de pulso y alerta 1 sola vez
-  const pulse = card.querySelector('.pulse-danger');
-  if((b.transcurrido>=LIMITE_BANIO && b.activo) || (a.transcurrido>=LIMITE_ALMUERZO && a.activo)){
-    pulse.hidden = false;
-  }else{
-    pulse.hidden = true;
-  }
-
-  // Disparar alerta una vez al pasarse (mensaje solicitado)
-  if(b.activo && b.transcurrido===LIMITE_BANIO && !b.alertado){
-    b.alertado = true;
-    alert("ey you, estas te estas pasando de tiempo.");
-    beep();
-  }
-  if(a.activo && a.transcurrido===LIMITE_ALMUERZO && !a.alertado){
-    a.alertado = true;
-    alert("ey you, estas te estas pasando de tiempo.");
-    beep();
-  }
-}
-
-function actualizarBadgeBanio(){
-  const el = $("#banioBadge");
-  el.textContent = usuarioEnBanio ? `Baño ocupado por: ${usuarioEnBanio}` : "Baño libre";
-}
-
-/* ====== Reinicio automático a medianoche ====== */
-function resetDia(){
-  AGENTES.forEach(nombre=>{
-    const e = estado[nombre];
-    e.banio = {activo:false,inicio:0,transcurrido:0,alertado:false};
-    e.almuerzo = {activo:false,inicio:0,transcurrido:0,alertado:false};
-    pintar(nombre);
+// --- Escuchar Firestore ---
+onSnapshot(refBanio, (snap) => {
+  if (!snap.exists()) return;
+  const data = snap.data();
+  nombres.forEach(nombre => {
+    const info = data[nombre] || { tipo: null, inicio: null, tiempoBanio: 0, tiempoAlmuerzo: 0 };
+    tarjetas[nombre].info = info;
+    if (info.tipo) { 
+      tarjetas[nombre].estado.textContent = info.tipo === "baño" ? "En Baño" : "Almorzando"; 
+      tarjetas[nombre].estado.className = "estado ocupado"; 
+    } else { 
+      tarjetas[nombre].estado.textContent = "Libre"; 
+      tarjetas[nombre].estado.className = "estado libre"; 
+    }
   });
-  usuarioEnBanio = null;
-  actualizarBadgeBanio();
+});
+
+// --- Cronómetros ---
+setInterval(() => {
+  const ahora = Date.now();
+  nombres.forEach(nombre => {
+    const info = tarjetas[nombre].info;
+    if (!info) return;
+    let tBanio = info.tiempoBanio || 0, tAlmuerzo = info.tiempoAlmuerzo || 0;
+    const inicioVal = info.inicio;
+    const inicioMs = (inicioVal && inicioVal.toMillis) ? inicioVal.toMillis() : (typeof inicioVal === "number" ? inicioVal : null);
+    if (info.tipo === "baño" && inicioMs) tBanio += Math.floor((ahora - inicioMs) / 1000);
+    if (info.tipo === "almuerzo" && inicioMs) tAlmuerzo += Math.floor((ahora - inicioMs) / 1000);
+    const minB = Math.floor(tBanio / 60), secB = tBanio % 60;
+    const minA = Math.floor(tAlmuerzo / 60), secA = tAlmuerzo % 60;
+    tarjetas[nombre].tiempoBanio.innerHTML = `Baño: <span class="cronometro">${minB}:${secB.toString().padStart(2, "0")}</span>`;
+    tarjetas[nombre].tiempoAlmuerzo.innerHTML = `Almuerzo: <span class="cronometro">${minA}:${secA.toString().padStart(2, "0")}</span>`;
+    if (info.tipo === "baño" && tBanio > LIMITE.baño) { tarjetas[nombre].estado.className = "estado excedido"; tarjetas[nombre].estado.textContent = "Baño excedido"; }
+    if (info.tipo === "almuerzo" && tAlmuerzo > LIMITE.almuerzo) { tarjetas[nombre].estado.className = "estado excedido"; tarjetas[nombre].estado.textContent = "Almuerzo excedido"; }
+  });
+}, 1000);
+
+// --- Registro llamadas ---
+async function registrarLlamada(nombre, respondio) {
+  const tar = tarjetas[nombre];
+  const numero = tar.inputNumero.value.trim();
+  const cant = Number(tar.selectCant.value);
+  if (!numero) { alert("Número obligatorio"); return; }
+
+  try {
+    for (let i = 0; i < cant; i++) {
+      await addDoc(collection(db, "llamadas"), {
+        agente: nombre,
+        numero,
+        respondio,
+        cantidad: 1,
+        timestamp: serverTimestamp()
+      });
+    }
+    tar.inputNumero.value = "";
+    tar.selectCant.value = "1";
+  } catch (e) {
+    console.error(e);
+  }
 }
 
-function programarReset(){
-  const ahora = new Date();
-  const manana = new Date(ahora);
-  manana.setHours(24,0,0,0); // siguiente medianoche
-  const ms = manana - ahora;
-  setTimeout(()=>{
-    resetDia();
-    setInterval(resetDia, 24*60*60*1000); // luego cada 24h
-  }, ms);
-}
+// --- Escuchar llamadas ---
+onSnapshot(collection(db, "llamadas"), (snapshot) => {
+  const llamadasPorAgente = {};
+  snapshot.forEach((doc) => {
+    const data = doc.data();
+    if (!llamadasPorAgente[data.agente]) llamadasPorAgente[data.agente] = { total: 0, exito: 0, fallo: 0 };
+    llamadasPorAgente[data.agente].total++;
+    data.respondio ? llamadasPorAgente[data.agente].exito++ : llamadasPorAgente[data.agente].fallo++;
+  });
 
-/* ====== Init ====== */
-construirUI();
-actualizarBadgeBanio();
-setInterval(()=>{ try{ actualizar(); }catch(e){} }, 1000);
-programarReset();
+  nombres.forEach((nombre) => {
+    const stats = llamadasPorAgente[nombre] || { total: 0, exito: 0, fallo: 0 };
+    if (tarjetas[nombre]) {
+      tarjetas[nombre].estadisticas.textContent =
+        `Llamadas: ${stats.total} | ✅:${stats.exito} | ❌:${stats.fallo}`;
+    }
+  });
+});
+
+// --- BOTÓN RESET OCULTO ---
+const btnReset = document.createElement("button");
+btnReset.textContent = "⟳ RESET";
+Object.assign(btnReset.style, {
+  position: "fixed", Top: "10px", right: "80px",
+  padding: "8px 12px", fontSize: "14px", borderRadius: "8px",
+  border: "none", background: "#ef4444", color: "white",
+  cursor: "pointer", opacity: "0", transition: "opacity 0.3s ease", zIndex: "5000"
+});
+document.body.appendChild(btnReset);
+
+// --- BOTÓN DESCARGAR EXCEL ---
+const btnExcel = document.createElement("button");
+btnExcel.textContent = "⬇️ EXCEL";
+Object.assign(btnExcel.style, {
+  position: "fixed", top: "10px", right: "177px",
+  padding: "8px 12px", fontSize: "14px", borderRadius: "8px",
+  border: "none", background: "#22c55e", color: "white",
+  cursor: "pointer", opacity: "0", transition: "opacity 0.3s ease", zIndex: "5000"
+});
+document.body.appendChild(btnExcel);
+
+// --- BOTÓN ABRIR DASHBOARD ---
+const btnDashboard = document.createElement("button");
+btnDashboard.textContent = "📊 ENCUESTAS  ";
+
+Object.assign(btnDashboard.style, {
+  position: "fixed",
+  top: "10px",
+  right: "280px",
+  padding: "8px 12px",
+  fontSize: "14px",
+  borderRadius: "8px",
+  border: "none",
+  background: "#0d6efd",
+  color: "white",
+  cursor: "pointer",
+  opacity: "0",
+  transition: "opacity 0.3s ease",
+  zIndex: "5000"
+});
+
+// Acción: abrir enlace en nueva pestaña
+btnDashboard.onclick = () => {
+  window.open(
+    "https://firebasestorage.googleapis.com/v0/b/workplace-18675.firebasestorage.app/o/Dashboard%20Encuestas.html?alt=media&token=78d463d1-3957-4d2b-9fdb-e7f435babaff",
+    "_blank"
+  );
+};
+
+
+// Agregar al body
+document.body.appendChild(btnDashboard);
+
+
+document.addEventListener("keydown", (e) => {
+  if (e.shiftKey && e.key.toLowerCase() === "q") {
+    btnReset.style.opacity = btnReset.style.opacity === "1" ? "0" : "1";
+  }
+  if (e.shiftKey && e.key.toLowerCase() === "q") {
+    btnExcel.style.opacity = btnExcel.style.opacity === "1" ? "0" : "1";
+  }
+  if(e.shiftKey && e.key.toLowerCase() === "q") {
+    btnDashboard.style.opacity = btnDashboard.style.opacity === "1" ? "0" : "1";
+  }
+});
+
+btnReset.onclick = async () => {
+  if (!confirm("¿Seguro que deseas REINICIAR todo (tiempos y llamadas)?")) return;
+  nombres.forEach((nombre) => {
+    tarjetas[nombre].info.tiempoBanio = 0;
+    tarjetas[nombre].info.tiempoAlmuerzo = 0;
+    tarjetas[nombre].info.tipo = null;
+    tarjetas[nombre].info.inicio = null;
+    tarjetas[nombre].estado.textContent = "Libre";
+    tarjetas[nombre].estado.className = "estado libre";
+    tarjetas[nombre].tiempoBanio.innerHTML = `Baño: <span class='cronometro'>0:00</span>`;
+    tarjetas[nombre].tiempoAlmuerzo.innerHTML = `Almuerzo: <span class='cronometro'>0:00</span>`;
+  });
+
+  const resetData = {};
+  nombres.forEach((nombre) => resetData[nombre] = { tipo: null, inicio: null, tiempoBanio: 0, tiempoAlmuerzo: 0 });
+  await updateDoc(refBanio, resetData);
+
+  const llamadasSnapshot = await getDocs(collection(db, "llamadas"));
+  for (const docSnap of llamadasSnapshot.docs) await deleteDoc(doc(db, "llamadas", docSnap.id));
+
+  alert("Todo se ha reiniciado correctamente ✅");
+};
+
+// --- DESCARGAR A EXCEL ---
+btnExcel.onclick = async () => {
+  const llamadasSnapshot = await getDocs(collection(db, "llamadas"));
+  const data = llamadasSnapshot.docs.map(d => {
+    const item = d.data();
+    const fecha = item.timestamp?.toDate ? item.timestamp.toDate().toLocaleString() : "";
+    return { Agente: item.agente, Numero: item.numero, Respondió: item.respondio ? "✅" : "❌", Fecha: fecha };
+  });
+
+  if (!data.length) return alert("No hay llamadas registradas.");
+
+  const ws = XLSX.utils.json_to_sheet(data);
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, "Llamadas");
+  XLSX.writeFile(wb, `llamadas_salientes_${new Date().toLocaleDateString().replace(/\//g, "-")}.xlsx`);
+};
+
 </script>
-</body>
-</html>
 
+
+</body>
+
+</html>
