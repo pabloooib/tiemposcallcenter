@@ -150,7 +150,28 @@
     (Un solo archivo <code>.html</code>).
   </footer>
 
-<script>
+<!-- ===== Firebase + App ===== -->
+<script type="module">
+/* =================== Configuración Firebase =================== */
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import { 
+  getFirestore, doc, getDoc, setDoc, onSnapshot, runTransaction, serverTimestamp 
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+import { 
+  getAuth, signInAnonymously, onAuthStateChanged 
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+
+/* TODO: Reemplaza con tu configuración de Firebase */
+const firebaseConfig = {
+  apiKey: "TU_API_KEY",
+  authDomain: "TU_AUTH_DOMAIN",
+  projectId: "TU_PROJECT_ID",
+  appId: "TU_APP_ID",
+};
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+const auth = getAuth(app);
+
 /* =================== Datos de agentes =================== */
 const AGENTES = [
   "Pablo","Daniel","Andres","Rafael","Alejandro",
@@ -162,9 +183,10 @@ const AGENTES = [
 const LIMITE_BANIO = 15 * 60;     // 15 minutos
 const LIMITE_ALMUERZO = 60 * 60;  // 60 minutos
 
-/* ====== Estado global ====== */
-const estado = {}; // { nombre: {banio:{activo, inicio, transcurrido, alertado}, almuerzo:{...}} }
-let usuarioEnBanio = null;        // nombre del agente que está en baño (único)
+/* ====== Estado local (reflejo del remoto) ====== */
+const estado = {}; // { nombre: {banio:{activo, inicioMs, transcurrido, alertado, owner}, almuerzo:{...}} }
+let usuarioEnBanio = null;
+let myUid = null;
 
 /* ====== Utilidades ====== */
 const $ = (sel, ctx=document) => ctx.querySelector(sel);
@@ -187,9 +209,8 @@ function beep(){
   }catch(e){}
 }
 
-/* ====== Render ====== */
+/* ====== Render de UI ====== */
 const grid = $("#grid");
-
 function tarjetaHTML(nombre){
   return `
   <section class="card" data-user="${nombre}">
@@ -214,69 +235,30 @@ function tarjetaHTML(nombre){
     <div class="pulse-danger" hidden></div>
   </section>`;
 }
-
 function construirUI(){
   grid.innerHTML = AGENTES.map(tarjetaHTML).join("");
   AGENTES.forEach(nombre=>{
     estado[nombre] = {
-      banio: {activo:false, inicio:0, transcurrido:0, alertado:false},
-      almuerzo: {activo:false, inicio:0, transcurrido:0, alertado:false},
+      banio: {activo:false, inicioMs:0, transcurrido:0, alertado:false, owner:null},
+      almuerzo: {activo:false, inicioMs:0, transcurrido:0, alertado:false, owner:null},
     };
   });
-
   grid.addEventListener("click", (ev)=>{
     const btn = ev.target.closest(".btn");
     if(!btn) return;
     const card = ev.target.closest(".card");
     const nombre = card.dataset.user;
     const tipo = btn.dataset.k; // "banio" o "almuerzo"
-    toggle(nombre, tipo);
+    toggleRemoto(nombre, tipo);
   });
 }
-
-/* ====== Lógica principal ====== */
-function toggle(nombre, tipo){
-  const reg = estado[nombre][tipo];
-
-  // Reglas de exclusividad para baño
-  if(tipo==="banio"){
-    if(!reg.activo && usuarioEnBanio && usuarioEnBanio!==nombre){
-      alert(`⚠️ Solo una persona en baño.\nActualmente: ${usuarioEnBanio}`);
-      beep();
-      return;
-    }
-  }
-
-  reg.activo = !reg.activo;
-  reg.alertado = false;
-  if(reg.activo){
-    reg.inicio = Date.now() - reg.transcurrido*1000; // reanudar si estaba pausado
-    if(tipo==="banio") usuarioEnBanio = nombre;
-  }else{
-    reg.transcurrido = Math.floor((Date.now() - reg.inicio)/1000);
-    if(tipo==="banio" && usuarioEnBanio===nombre) usuarioEnBanio = null;
-  }
-  pintar(nombre);
-  actualizarBadgeBanio();
+function actualizarBadgeBanio(){
+  const el = $("#banioBadge");
+  el.textContent = usuarioEnBanio ? `Baño ocupado por: ${usuarioEnBanio}` : "Baño libre";
 }
-
-function actualizar(){
-  const ahora = Date.now();
-  for(const nombre of AGENTES){
-    for(const tipo of ["banio","almuerzo"]){
-      const reg = estado[nombre][tipo];
-      if(reg.activo){
-        reg.transcurrido = Math.floor((ahora - reg.inicio)/1000);
-      }
-    }
-    pintar(nombre);
-  }
-}
-
 function pintar(nombre){
   const card = grid.querySelector(`.card[data-user="${CSS.escape(nombre)}"]`);
   if(!card) return;
-
   const b = estado[nombre].banio;
   const a = estado[nombre].almuerzo;
 
@@ -305,7 +287,7 @@ function pintar(nombre){
   ta.classList.toggle('limit', a.transcurrido>=LIMITE_ALMUERZO && a.transcurrido<LIMITE_ALMUERZO+60);
   ta.classList.toggle('over',  a.transcurrido>=LIMITE_ALMUERZO);
 
-  // Anillo de pulso y alerta 1 sola vez
+  // Anillo de pulso
   const pulse = card.querySelector('.pulse-danger');
   if((b.transcurrido>=LIMITE_BANIO && b.activo) || (a.transcurrido>=LIMITE_ALMUERZO && a.activo)){
     pulse.hidden = false;
@@ -313,53 +295,213 @@ function pintar(nombre){
     pulse.hidden = true;
   }
 
-  // Disparar alerta una vez al pasarse (mensaje solicitado)
-  if(b.activo && b.transcurrido===LIMITE_BANIO && !b.alertado){
+  // Alerta solo en el equipo que inició (owner === myUid)
+  if(b.activo && b.owner===myUid && b.transcurrido===LIMITE_BANIO && !b.alertado){
     b.alertado = true;
-    alert("ey you, estas te estas pasando de tiempo.");
+    alert("⚠️ Tiempo de BAÑO alcanzó el límite.");
     beep();
   }
-  if(a.activo && a.transcurrido===LIMITE_ALMUERZO && !a.alertado){
+  if(a.activo && a.owner===myUid && a.transcurrido===LIMITE_ALMUERZO && !a.alertado){
     a.alertado = true;
-    alert("ey you, estas te estas pasando de tiempo.");
+    alert("⚠️ Tiempo de ALMUERZO alcanzó el límite.");
     beep();
   }
 }
 
-function actualizarBadgeBanio(){
-  const el = $("#banioBadge");
-  el.textContent = usuarioEnBanio ? `Baño ocupado por: ${usuarioEnBanio}` : "Baño libre";
-}
-
-/* ====== Reinicio automático a medianoche ====== */
-function resetDia(){
-  AGENTES.forEach(nombre=>{
-    const e = estado[nombre];
-    e.banio = {activo:false,inicio:0,transcurrido:0,alertado:false};
-    e.almuerzo = {activo:false,inicio:0,transcurrido:0,alertado:false};
+/* ====== Cálculo de tiempos ====== */
+function actualizarTiempos(){
+  const ahora = Date.now();
+  for(const nombre of AGENTES){
+    for(const tipo of ["banio","almuerzo"]){
+      const reg = estado[nombre][tipo];
+      if(reg.activo && reg.inicioMs){
+        reg.transcurrido = Math.floor((ahora - reg.inicioMs)/1000);
+      }else{
+        // conservamos transcurrido si está inactivo (lo muestra fijo)
+        if(!reg.activo) reg.transcurrido = 0; // si quieres mantener el valor previo, comenta esta línea
+      }
+    }
     pintar(nombre);
-  });
-  usuarioEnBanio = null;
-  actualizarBadgeBanio();
+  }
 }
 
-function programarReset(){
-  const ahora = new Date();
-  const manana = new Date(ahora);
-  manana.setHours(24,0,0,0); // siguiente medianoche
-  const ms = manana - ahora;
-  setTimeout(()=>{
-    resetDia();
-    setInterval(resetDia, 24*60*60*1000); // luego cada 24h
-  }, ms);
+/* ====== Lectura/Escritura remota en Firestore ====== */
+const REF = doc(db, "estado", "global");
+
+/** Crea el documento si no existe */
+async function ensureDocumento(){
+  const snap = await getDoc(REF);
+  if(!snap.exists()){
+    const agentes = {};
+    for(const n of AGENTES){
+      agentes[n] = {
+        banio:    {activo:false, inicio:null, owner:null},
+        almuerzo: {activo:false, inicio:null, owner:null}
+      };
+    }
+    await setDoc(REF, {
+      usuarioEnBanio: null,
+      lastResetDate: hoyISO(),
+      agentes
+    });
+  }
+}
+
+/** Devuelve 'YYYY-MM-DD' en hora local */
+function hoyISO(){
+  const d = new Date();
+  const y = d.getFullYear();
+  const m = `${d.getMonth()+1}`.padStart(2,"0");
+  const day = `${d.getDate()}`.padStart(2,"0");
+  return `${y}-${m}-${day}`;
+}
+
+/** Asegura reset 1 vez al día usando un campo en el doc */
+async function tryResetDiario(){
+  await runTransaction(db, async (tx)=>{
+    const snap = await tx.get(REF);
+    if(!snap.exists()) return;
+    const data = snap.data();
+    if(data.lastResetDate !== hoyISO()){
+      const agentes = {...data.agentes};
+      for(const n of AGENTES){
+        agentes[n] = {
+          banio:    {activo:false, inicio:null, owner:null},
+          almuerzo: {activo:false, inicio:null, owner:null},
+        };
+      }
+      tx.update(REF, { 
+        usuarioEnBanio: null,
+        lastResetDate: hoyISO(),
+        agentes
+      });
+    }
+  });
+}
+
+/** Listener de cambios del documento global */
+function escucharCambios(){
+  onSnapshot(REF, (snap)=>{
+    if(!snap.exists()) return;
+    const data = snap.data();
+    usuarioEnBanio = data.usuarioEnBanio || null;
+    actualizarBadgeBanio();
+
+    // Mapear a estado local
+    for(const n of AGENTES){
+      const rem = data.agentes?.[n];
+      if(!rem) continue;
+      const b = rem.banio || {};
+      const a = rem.almuerzo || {};
+      // Firestore Timestamp -> ms
+      const bMs = b.inicio && b.inicio.toMillis ? b.inicio.toMillis() : 0;
+      const aMs = a.inicio && a.inicio.toMillis ? a.inicio.toMillis() : 0;
+
+      // Conservar alertado (local), pero actualizar demás campos
+      const prevB = estado[n].banio.alertado;
+      const prevA = estado[n].almuerzo.alertado;
+
+      estado[n].banio = {
+        ...estado[n].banio,
+        activo: !!b.activo,
+        inicioMs: bMs,
+        owner: b.owner || null,
+        // si se desactiva, reseteamos alertado
+        alertado: (!!b.activo) ? prevB : false,
+      };
+      estado[n].almuerzo = {
+        ...estado[n].almuerzo,
+        activo: !!a.activo,
+        inicioMs: aMs,
+        owner: a.owner || null,
+        alertado: (!!a.activo) ? prevA : false,
+      };
+    }
+    // Recalcular y pintar
+    actualizarTiempos();
+  });
+}
+
+/** Toggle remoto usando transacción (respeta "un baño a la vez") */
+async function toggleRemoto(nombre, tipo){
+  try{
+    await runTransaction(db, async (tx)=>{
+      const snap = await tx.get(REF);
+      if(!snap.exists()) throw new Error("Documento global no existe.");
+      const data = snap.data();
+      const agentes = {...data.agentes};
+      const reg = {...agentes[nombre][tipo]};
+
+      if(tipo === "banio"){
+        if(!reg.activo){
+          // Quiere iniciar baño
+          if(data.usuarioEnBanio && data.usuarioEnBanio !== nombre){
+            throw new Error(`Ya está en baño: ${data.usuarioEnBanio}`);
+          }
+          reg.activo = true;
+          reg.inicio = serverTimestamp();
+          reg.owner = myUid;
+          agentes[nombre][tipo] = reg;
+          tx.update(REF, {
+            usuarioEnBanio: nombre,
+            [`agentes.${nombre}.${tipo}`]: reg
+          });
+        }else{
+          // Quiere terminar baño
+          reg.activo = false;
+          reg.inicio = null;
+          reg.owner = null;
+          agentes[nombre][tipo] = reg;
+          const banioActual = data.usuarioEnBanio === nombre ? null : data.usuarioEnBanio;
+          tx.update(REF, {
+            usuarioEnBanio: banioActual,
+            [`agentes.${nombre}.${tipo}`]: reg
+          });
+        }
+      }else{
+        // Almuerzo (sin lock global)
+        if(!reg.activo){
+          reg.activo = true;
+          reg.inicio = serverTimestamp();
+          reg.owner = myUid;
+        }else{
+          reg.activo = false;
+          reg.inicio = null;
+          reg.owner = null;
+        }
+        agentes[nombre][tipo] = reg;
+        tx.update(REF, {
+          [`agentes.${nombre}.${tipo}`]: reg
+        });
+      }
+    });
+  }catch(err){
+    alert("⚠️ " + (err?.message || "No se pudo actualizar."));
+    beep();
+  }
 }
 
 /* ====== Init ====== */
-construirUI();
-actualizarBadgeBanio();
-setInterval(()=>{ try{ actualizar(); }catch(e){} }, 1000);
-programarReset();
+function initApp(){
+  construirUI();
+  ensureDocumento().then(()=>{
+    escucharCambios();
+    // Cron local de UI
+    setInterval(()=>{ try{ actualizarTiempos(); }catch(e){} }, 1000);
+    // Chequeo diario de reset (cada 2 minutos)
+    setInterval(()=>{ try{ tryResetDiario(); }catch(e){} }, 120000);
+  });
+}
+
+/* Autenticación anónima y arranque */
+onAuthStateChanged(auth, (user)=>{
+  if(user){
+    myUid = user.uid;
+    initApp();
+  }else{
+    signInAnonymously(auth).catch(console.error);
+  }
+});
 </script>
 </body>
 </html>
-
