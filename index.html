@@ -9,381 +9,261 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
 
   <style>
-    /* ====== THEME TOKENS ====== */
-    :root {
-      --bg1: #0a0f24;
-      --bg2: #111c44;
-      --text: #e6eefc;
-      --text-soft: #c7d1eb;
-      --card: rgba(255,255,255,0.06);
-      --card-border: rgba(255,255,255,0.14);
-      --shadow: 0 8px 22px rgba(0,0,0,0.25);
-      --accent: #7c9bff;
+    /* ====== TOTAL BLACK THEME ====== */
+    :root{
+      --bg:#000000;               /* negro puro */
+      --card:#0e0e0e;             /* tarjeta */
+      --card-br:#1a1a1a;          /* borde sutil */
+      --text:#f5f5f5;             /* texto principal */
+      --text-soft:#cfcfcf;        /* texto secundario */
 
-      --success: #22c55e;
-      --warn: #f59e0b;
-      --warn-strong: #facc15;
-      --danger: #ef4444;
+      --chip-free-bg:#0f2617;     /* verdes muy oscuros */
+      --chip-free:#22c55e;
+      --chip-busy-bg:#2a260b;     /* dorados oscuros */
+      --chip-busy:#facc15;
+      --chip-over-bg:#2a0d0d;     /* rojos oscuros */
+      --chip-over:#ef4444;
 
-      --chip-bg-free: rgba(34,197,94,0.16);
-      --chip-br-free: #22c55e55;
-      --chip-free: #22c55e;
+      --ring: rgba(255,255,255,0.12);
+      --shadow: 0 8px 24px rgba(0,0,0,0.7);
+      --radius:14px;
 
-      --chip-bg-busy: rgba(250,204,21,0.18);
-      --chip-br-busy: #facc1555;
-      --chip-busy: #facc15;
-
-      --chip-bg-over: rgba(239,68,68,0.18);
-      --chip-br-over: #ef444455;
-      --chip-over: #ef4444;
-
-      --muted: rgba(255,255,255,0.35);
-      --ring: rgba(124,155,255,0.35);
-      --menu-glow: rgba(124,155,255,0.45);
-
-      --card-radius: 16px;
+      --active-br: #ffffff55;
+      --active-glow: 0 0 0 2px #ffffff22, 0 0 24px #ffffff18;
     }
 
-    /* Light theme overrides */
-    [data-theme="light"] {
-      --bg1: #f6f8fc;
-      --bg2: #e9efff;
-      --text: #0f172a;
-      --text-soft: #3b4256;
-      --card: rgba(255,255,255,0.85);
-      --card-border: rgba(17,24,39,0.08);
-      --shadow: 0 10px 26px rgba(17,24,39,0.08);
-      --accent: #3b82f6;
-      --muted: rgba(15,23,42,0.4);
-      --ring: rgba(59,130,246,0.28);
-      --menu-glow: rgba(59,130,246,0.25);
-      --chip-bg-free: rgba(34,197,94,0.15);
-      --chip-bg-busy: rgba(250,204,21,0.15);
-      --chip-bg-over: rgba(239,68,68,0.15);
-    }
-
-    /* ====== BASE LAYOUT ====== */
-    * { box-sizing: border-box; }
-    html,body { height: 100%; }
-    body {
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0;
       font-family: 'Inter', system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
-      margin: 0;
-      color: var(--text);
-      background: linear-gradient(135deg, var(--bg1), var(--bg2));
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-      padding: 18px 16px 18px;
-      transition: background 0.25s ease;
+      color:var(--text);
+      background:
+        radial-gradient(80% 120% at 20% 10%, #0a0a0a 0%, transparent 60%),
+        radial-gradient(80% 120% at 80% 90%, #0a0a0a 0%, transparent 60%),
+        var(--bg);
+      display:flex;
+      flex-direction:column;
+      gap:14px;
+      padding:20px 16px 28px;
     }
 
-    header {
-      width: 100%;
-      max-width: 1480px;
-      margin: 0 auto;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 12px;
+    header{
+      width:100%;
+      max-width:1500px;
+      margin:0 auto 4px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+    }
+    h1{
+      margin:0;
+      font-size: clamp(18px, 2.6vw, 28px);
+      font-weight:700;
+      letter-spacing:.5px;
+      color:#fff;
+      opacity:.92;
     }
 
-    h1 {
-      margin: 0;
-      font-size: clamp(20px, 3vw, 36px);
-      font-weight: 700;
-      letter-spacing: .4px;
-      text-shadow: 0 0 18px rgba(255,255,255,0.14);
-      display: flex;
-      align-items: center;
-      gap: 12px;
+    /* GRID */
+    .contenedor{
+      width:100%;
+      max-width:1500px;
+      margin:0 auto;
+      display:grid;
+      grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+      gap:14px;
+      align-items:start;
     }
 
-    /* toolbar de acciones */
-    .acciones {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
-      align-items: center;
+    /* MODO COMPACTO */
+    body.compacto .contenedor{
+      grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+      gap:12px;
     }
+    body.compacto .tarjeta{ padding:12px 10px; }
+    body.compacto .avatar{ width:50px; height:50px; }
+    body.compacto .nombre{ font-size:15px; }
+    body.compacto .estado{ font-size:11px; padding:5px 10px; }
+    body.compacto .tiempo{ font-size:12px; }
 
-    .btn {
-      appearance: none;
-      border: 1px solid var(--card-border);
-      background: var(--card);
-      color: var(--text);
-      height: 36px;
-      padding: 0 12px;
-      border-radius: 10px;
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      cursor: pointer;
+    /* CARD */
+    .tarjeta{
+      position:relative;
+      background: linear-gradient(180deg, var(--card), #0a0a0a);
+      border:1px solid var(--card-br);
+      border-radius:var(--radius);
+      padding:16px 12px 14px;
+      text-align:center;
       box-shadow: var(--shadow);
-      backdrop-filter: blur(10px);
-      -webkit-backdrop-filter: blur(10px);
-      transition: transform .12s ease, box-shadow .18s ease, background .2s ease, border-color .2s ease;
-      font-weight: 600;
-    }
-    .btn:hover { transform: translateY(-1px); box-shadow: 0 12px 26px rgba(0,0,0,0.22); }
-    .btn:active { transform: translateY(0); }
-
-    .btn.primary { border-color: transparent; background: linear-gradient(180deg, var(--accent), #566bff); color: #fff; }
-    .btn.success { background: linear-gradient(180deg, #22c55e, #10b981); color: #fff; border: none; }
-    .btn.warn    { background: linear-gradient(180deg, #f59e0b, #f59e0b); color: #1f2937; border: none; }
-    .btn.danger  { background: linear-gradient(180deg, #ef4444, #dc2626); color: #fff; border: none; }
-
-    /* ====== GRID ====== */
-    .contenedor {
-      width: 100%;
-      max-width: 1480px;
-      margin: 0 auto;
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
-      gap: 16px;
-      align-items: start;
-    }
-
-    /* ====== CARD ====== */
-    .tarjeta {
-      position: relative;
-      background: var(--card);
-      border: 1px solid var(--card-border);
-      border-radius: var(--card-radius);
-      padding: 16px 12px 14px;
-      text-align: center;
-      box-shadow: var(--shadow);
+      cursor:pointer;
+      overflow:hidden;
       transition: transform .18s ease, box-shadow .22s ease, border-color .2s ease, background .2s ease;
-      cursor: pointer;
-      overflow: hidden;
     }
-    .tarjeta:hover { transform: translateY(-3px); box-shadow: 0 14px 28px rgba(0,0,0,0.28); }
-    .tarjeta.dimmed { filter: brightness(0.55); transform: scale(0.985); }
+    .tarjeta:hover{ transform: translateY(-2px); box-shadow: 0 12px 30px rgba(0,0,0,0.75); }
+    .tarjeta.dimmed{ filter:brightness(.55); transform:scale(.985); }
 
-    /* avatar */
-    .avatar {
-      width: 62px; height: 62px; border-radius: 50%;
-      margin: 4px auto 8px;
-      display: grid; place-items: center;
-      font-weight: 700; font-size: 20px;
-      color: #fff;
-      background: radial-gradient(120px 120px at 30% 30%, #7c9bff, #3b4aa8 55%, #1b235a);
-      border: 2px solid rgba(255,255,255,0.22);
-      box-shadow: 0 8px 22px rgba(0,0,0,0.28), inset 0 0 0 2px rgba(255,255,255,0.06);
-      overflow: hidden;
+    /* Tarjeta activa (seleccionada) */
+    .tarjeta.activa{
+      border-color: var(--active-br);
+      box-shadow: var(--active-glow), var(--shadow);
     }
-    .avatar.foto {
-      background: #000;
+
+    .avatar{
+      width:60px; height:60px; border-radius:50%;
+      margin:2px auto 8px; display:grid; place-items:center;
+      color:#fff; font-weight:700; font-size:20px;
+      background: radial-gradient(120px 120px at 30% 30%, #1b1b1b, #101010 55%, #050505);
+      border:1px solid #222;
+      box-shadow: inset 0 0 0 1px rgba(255,255,255,0.03);
+      overflow:hidden;
+      user-select:none;
+    }
+    .avatar.foto{
       background-size: cover;
       background-position: center;
       text-indent: -9999px;
     }
 
-    .nombre {
-      font-size: 18px;
-      font-weight: 700;
-      margin-bottom: 6px;
-      color: var(--text);
+    .nombre{
+      font-size:16px; font-weight:700; color:var(--text); margin-bottom:6px;
+      user-select:none;
     }
 
-    .estado {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      font-size: 13px;
-      font-weight: 700;
-      padding: 6px 12px;
-      border-radius: 999px;
-      margin-bottom: 10px;
-      border: 1px solid transparent;
+    .estado{
+      display:inline-flex; align-items:center; gap:8px;
+      font-size:12px; font-weight:800;
+      padding:6px 12px; border-radius:999px;
+      margin-bottom:10px; border:1px solid transparent;
       transition: background .25s ease, color .25s ease, border-color .25s ease, transform .12s ease;
+      user-select:none;
     }
-    .estado.libre   { background: var(--chip-bg-free); border-color: var(--chip-br-free); color: var(--chip-free); }
-    .estado.ocupado { background: var(--chip-bg-busy); border-color: var(--chip-br-busy); color: var(--chip-busy); animation: sutil-pulse 1.4s ease-in-out infinite; }
-    .estado.excedido{ background: var(--chip-bg-over); border-color: var(--chip-br-over);  color: var(--chip-over);  animation: sutil-pulse 1.2s ease-in-out infinite; }
+    .estado.libre{ background:var(--chip-free-bg); color:var(--chip-free); border-color:#1f3e2b; }
+    .estado.ocupado{ background:var(--chip-busy-bg); color:var(--chip-busy); border-color:#4a3e12; animation: sutil 1.5s ease-in-out infinite; }
+    .estado.excedido{ background:var(--chip-over-bg); color:var(--chip-over); border-color:#4a1212; animation: sutil 1.2s ease-in-out infinite; }
+    @keyframes sutil{0%,100%{transform:scale(1)}50%{transform:scale(1.05)}}
 
-    @keyframes sutil-pulse { 0%,100%{ transform: scale(1);} 50%{ transform: scale(1.06);} }
+    .tiempo{ font-size:13px; margin:3px 0; color:var(--text) }
+    .cronometro{ color:#f0c62b; font-weight:800; }
 
-    /* animación de cambio de estado */
-    .tarjeta.flash {
-      box-shadow: 0 0 0 0 rgba(124,155,255,0.55), var(--shadow);
+    /* flash cuando cambia de estado */
+    .tarjeta.flash{
+      box-shadow: 0 0 0 0 var(--ring), var(--shadow);
       animation: ring .8s ease-out;
     }
-    @keyframes ring {
-      0% { box-shadow: 0 0 0 0 var(--ring), var(--shadow); }
-      100% { box-shadow: 0 0 0 18px rgba(124,155,255,0), var(--shadow); }
+    @keyframes ring{
+      0%{ box-shadow: 0 0 0 0 var(--ring), var(--shadow); }
+      100%{ box-shadow: 0 0 0 18px rgba(255,255,255,0), var(--shadow); }
     }
 
-    .tiempo {
-      font-size: 14px;
-      margin: 3px 0;
-      color: var(--text);
+    /* flip */
+    .flip{ position:relative; width:100%; }
+    .frontal, .trasera{
+      backface-visibility:hidden;
+      transition: opacity .26s ease, transform .26s ease;
+      width:100%;
     }
-    .cronometro { color: var(--warn-strong); font-weight: 800; }
+    .frontal.active, .trasera.active{ opacity:1; position:relative; z-index:2; transform: translateY(0); }
+    .frontal{ opacity:0; position:absolute; inset:0; transform: translateY(6px); }
+    .trasera{ opacity:0; position:absolute; inset:0; transform: translateY(6px); }
 
-    /* icono telefono / regreso */
-    .icon-telefono, .regresar {
-      position: absolute;
-      top: 8px; right: 10px;
-      font-size: 22px; cursor: pointer; opacity: 0.9;
+    /* iconos */
+    .icon-telefono, .regresar{
+      position:absolute; top:8px; right:10px;
+      font-size:20px; cursor:pointer; opacity:.9;
       transition: transform .15s ease, opacity .15s ease;
-      user-select: none;
+      user-select:none; color:#eaeaea;
     }
-    .icon-telefono:hover, .regresar:hover { transform: scale(1.18); opacity: 1; }
+    .icon-telefono:hover, .regresar:hover{ transform:scale(1.12); opacity:1; }
 
-    /* flip areas */
-    .flip { position: relative; width: 100%; }
-    .frontal, .trasera {
-      backface-visibility: hidden;
-      transition: opacity .28s ease, transform .28s ease;
-      width: 100%;
+    /* formulario trasera (se deja por si lo usas a futuro) */
+    .registro{ display:flex; flex-direction:column; gap:8px; margin-top:8px; }
+    .registro input, .registro select{
+      background:#0b0b0b; border:1px solid #1a1a1a; color:#eee;
+      height:32px; border-radius:10px; padding:0 10px; outline:none; font-size:14px;
     }
-    .frontal.active, .trasera.active { opacity: 1; position: relative; z-index: 2; transform: translateY(0); }
-    .frontal { opacity: 0; position: absolute; inset: 0; transform: translateY(6px); }
-    .trasera { opacity: 0; position: absolute; inset: 0; transform: translateY(6px); }
+    .botones{ display:flex; justify-content:center; gap:10px; }
+    .botones button{
+      width:40px; height:40px; border-radius:10px; border:1px solid #1a1a1a; color:#fff;
+      background:#121212; cursor:pointer; transition: transform .12s ease, box-shadow .18s ease;
+    }
+    .botones button:hover{ transform: translateY(-1px); }
+    .btn-check{ background:#16401f; border-color:#2b5c38; }
+    .btn-x{ background:#3a1515; border-color:#5a2020; }
 
-    /* registro */
-    .registro { display: flex; flex-direction: column; gap: 8px; margin-top: 8px; }
-    .registro input, .registro select {
-      background: rgba(255,255,255,0.10);
-      border: 1px solid rgba(255,255,255,0.18);
-      color: var(--text);
-      height: 32px; border-radius: 10px; padding: 0 10px; outline: none;
-      font-size: 14px;
-    }
-    .botones { display: flex; justify-content: center; gap: 12px; margin-top: 2px; }
-    .botones button {
-      width: 42px; height: 42px; border-radius: 12px; border: none; font-size: 18px; cursor: pointer;
-      transition: transform .12s ease, box-shadow .18s ease; box-shadow: var(--shadow);
-    }
-    .botones button:hover { transform: translateY(-1px); }
-    .btn-check { background: #16a34a; color: #fff; }
-    .btn-x { background: #ef4444; color: #fff; }
+    .estadisticas{ margin-top:8px; font-size:12px; color:var(--text-soft); }
 
-    .estadisticas {
-      margin-top: 8px; font-size: 13px; color: var(--text-soft);
+    /* MENÚ RADIAL */
+    .menu-radial{
+      position:fixed; transform:translate(-50%, -50%) scale(0.65);
+      transition: transform .22s ease, opacity .18s ease;
+      pointer-events:none; z-index:3000; opacity:0;
     }
+    .menu-radial.active{ transform:translate(-50%, -50%) scale(1); pointer-events:auto; opacity:1; }
+    .ring-base{
+      position:absolute; inset:-6px; border-radius:999px;
+      background: radial-gradient(120px 120px at 50% 50%, rgba(255,255,255,0.08), transparent 60%);
+      filter: blur(10px); opacity:.8; pointer-events:none;
+    }
+    .menu-radial button{
+      position:absolute; width:60px; height:60px; border-radius:14px;
+      border:1px solid #1d1d1d; background:#0d0d0d; color:#f0f0f0;
+      font-weight:800; font-size:20px; cursor:pointer; box-shadow: var(--shadow);
+      transition: transform .14s ease, box-shadow .18s ease, background .2s ease, border-color .2s ease, opacity .18s ease;
+    }
+    .menu-radial button:hover{ transform: scale(1.06); box-shadow: 0 10px 26px rgba(0,0,0,0.8); }
 
-    /* ====== MENÚ RADIAL REDISEÑADO ====== */
-    .menu-radial {
-      position: fixed;
-      transform: translate(-50%, -50%) scale(0.6);
-      transition: transform .25s ease, opacity .2s ease;
-      pointer-events: none;
-      z-index: 3000;
-      opacity: 0;
-    }
-    .menu-radial.active {
-      transform: translate(-50%, -50%) scale(1);
-      pointer-events: auto;
-      opacity: 1;
-    }
-    .ring-base {
-      position: absolute; inset: -6px;
-      border-radius: 999px;
-      background: radial-gradient(120px 120px at 50% 50%, var(--menu-glow), transparent 60%);
-      filter: blur(10px); opacity: .75;
-      pointer-events: none;
-    }
-    .menu-radial button {
-      position: absolute;
-      width: 62px; height: 62px; border-radius: 16px;
-      border: 1px solid var(--card-border);
-      background: var(--card);
-      color: var(--text);
-      font-weight: 800; font-size: 22px; cursor: pointer;
-      box-shadow: var(--shadow);
-      backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
-      transition: transform .16s ease, box-shadow .2s ease, background .2s ease, border-color .2s ease, opacity .2s ease;
-    }
-    .menu-radial button:hover { transform: scale(1.08); box-shadow: 0 10px 24px rgba(0,0,0,0.28); }
+    .btn-libre   { top:-72px; left:-10px;   background:#0e2a19; border-color:#1f3e2b; }
+    .btn-banio   { top:  8px; left:-90px;   background:#2a260b; color:#facc15; border-color:#4a3e12; }
+    .btn-almuerzo{ top:  8px; left: 70px;   background:#0c1e35; color:#96c7ff; border-color:#163253; }
 
-    /* ubicaciones circulares */
-    .btn-libre   { top: -74px; left: -10px;   background: linear-gradient(180deg, #22c55e, #16a34a); color: #fff; border: none; }
-    .btn-banio   { top:   8px; left: -92px;   background: linear-gradient(180deg, #facc15, #f59e0b); color: #1e293b; border: none; }
-    .btn-almuerzo{ top:   8px; left:  72px;   background: linear-gradient(180deg, #60a5fa, #3b82f6); color: #fff; border: none; }
-
-    /* tooltips */
-    .menu-radial button[data-tip]::after {
-      content: attr(data-tip);
-      position: absolute;
-      bottom: -26px; left: 50%; transform: translateX(-50%);
-      background: rgba(0,0,0,0.65);
-      color: #fff; font-size: 12px; padding: 4px 8px; border-radius: 6px;
-      white-space: nowrap; opacity: 0; pointer-events: none; transition: opacity .18s ease, transform .18s ease;
-    }
-    [data-theme="light"] .menu-radial button[data-tip]::after { background: rgba(17,24,39,0.75); }
-    .menu-radial button:hover::after { opacity: 1; transform: translate(-50%, -2px); }
-
-    /* ====== MODO TV ====== */
-    body.modo-tv .acciones .btn:not(.btn-tv) { opacity: .25; pointer-events: none; }
-    body.modo-tv .tarjeta { padding: 22px 14px; }
-    body.modo-tv .avatar { width: 76px; height: 76px; }
-    body.modo-tv .nombre { font-size: 20px; }
-    body.modo-tv .estado { font-size: 15px; padding: 8px 14px; }
-    body.modo-tv .tiempo { font-size: 16px; }
-    body.modo-tv .icon-telefono, body.modo-tv .regresar, body.modo-tv .registro, body.modo-tv .botones { display: none !important; }
-    body.modo-tv .contenedor { grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 18px; }
-
-    /* RESET ocultable */
-    #btnResetTodo {
-      opacity: 0;
-      pointer-events: none;
-      transition: opacity .25s ease;
-    }
-    #btnResetTodo.visible {
-      opacity: 1;
-      pointer-events: auto;
-    }
+    /* Sutileza: tooltip via title nativo del navegador (no CSS) */
   </style>
 </head>
-
 <body>
   <header>
     <h1>Executive Information Systems</h1>
-    <div class="acciones">
-      <button id="btnTema" class="btn" title="Cambiar tema">🌓 Tema</button>
-      <button id="btnFullscreen" class="btn" title="Pantalla completa">🖥️ Fullscreen</button>
-      <button id="btnTV" class="btn btn-tv primary" title="Modo TV (fuentes grandes)">📺 Modo TV</button>
-      <button id="btnDescargarExcel" class="btn success" title="Exportar Excel">⬇️ Excel</button>
-      <button id="btnResetTodo" class="btn danger" title="Reiniciar tiempos y llamadas">⟳ Reset</button>
-    </div>
   </header>
 
   <div class="contenedor" id="contenedor"></div>
 
-  <!-- menú radial -->
+  <!-- Menú radial -->
   <div id="menuGlobal" class="menu-radial" aria-hidden="true">
     <div class="ring-base"></div>
-    <button class="btn-libre"   data-tip="Marcar Libre"    title="Marcar Libre">✔</button>
-    <button class="btn-banio"   data-tip="Marcar Baño"     title="Marcar Baño">🚻</button>
-    <button class="btn-almuerzo"data-tip="Marcar Almuerzo" title="Marcar Almuerzo">🍔</button>
+    <button class="btn-libre"    title="Marcar Libre">✔</button>
+    <button class="btn-banio"    title="Marcar Baño">🚻</button>
+    <button class="btn-almuerzo" title="Marcar Almuerzo">🍔</button>
   </div>
 
+  <!-- Audio: beep sutil para excedido (base64) -->
+  <audio id="sndExcedido" preload="auto">
+    <source src="data:audio/wav;base64,UklGRnQAAABXQVZFZm10IBAAAAABAAEAESsAACJWAAACABYAZGF0YVwAAABwAAD/AAD/AAAA/wAAAP8AAP8AAP8AAP8AAP8AAP8AAP8AAP8AAP8AAP8AAP8AAP8AAP7//v/9//3//v/+/wAA/wAA/wAA/wAA/v/+//3//f/8//z//P/8//v/+//7//z//P/8//7//v/9//3//v/+//8AAAIAAwAEAAUABgAHAAcABwAHAAcABgAFBAQDAgEAAP7//v/9//z//P/7//v/+//7//v//AAAAg==" type="audio/wav">
+  </audio>
+
   <script type="module">
-    /****************** IMPORTS ******************/
+    /****************** IMPORTS (Firebase CDN v9 modular) ******************/
     import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-app.js";
     import {
-      getFirestore, doc, updateDoc, onSnapshot, collection,
-      getDocs, addDoc, serverTimestamp, deleteDoc
+      getFirestore, doc, getDoc, setDoc, updateDoc, onSnapshot
     } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore.js";
-    import * as XLSX from "https://cdn.jsdelivr.net/npm/xlsx@0.18.5/+esm";
 
-    /****************** FIREBASE ******************/
+    /****************** FIREBASE: TU NUEVO PROYECTO ******************/
     const firebaseConfig = {
-      apiKey: "AIzaSyDeAbygOcoV1G9Zh8wd7topjXttlmJ892Y",
-      authDomain: "workplace-18675.firebaseapp.com",
-      projectId: "workplace-18675",
-      storageBucket: "workplace-18675.appspot.com",
-      messagingSenderId: "606737102100",
-      appId: "1:606737102100:web:7084120bdabf1f8ca2be01"
+      apiKey: "AIzaSyAdLGsavsans6OmLeyD_9TndcrAObDQgqA",
+      authDomain: "bitacora-3fc27.firebaseapp.com",
+      projectId: "bitacora-3fc27",
+      storageBucket: "bitacora-3fc27.firebasestorage.app",
+      messagingSenderId: "921769640813",
+      appId: "1:921769640813:web:db160482d20ac32e595064",
+      measurementId: "G-3Z8GD6T0ML"
     };
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
 
-    /****************** DATOS BASE ******************/
+    /****************** DATOS ******************/
     const nombres = ["Nestor","Daniel","Andres","Rafael","Alejandro","Tania","Marta","Pablo","Saraí","Michi","Evelyn","Merlin","Ashley","Gabriela","Bryan","Diego","Jorge","Joselyne","Andrea","Omar","Javier","Synndy","Anthony","Mildred","Madelin","Majo","Monica","Jackeline"];
 
-    // 👉 Agrega aquí las fotos por nombre (opcional). Si no hay, se mostrará un avatar con iniciales.
+    // Fotos opcionales por nombre (si no hay, usa iniciales)
     const fotos = {
       // "Nestor": "https://tu-cdn/nestor.jpg",
       // "Daniel": "https://tu-cdn/daniel.jpg",
@@ -391,57 +271,31 @@
 
     const LIMITE = { baño: 15 * 60, almuerzo: 60 * 60 };
     const refBanio = doc(db, "banos", "estado");
+
     const contenedor = document.getElementById("contenedor");
-    const tarjetas = {};
     const menuGlobal = document.getElementById("menuGlobal");
-    let tarjetaActiva = null;
+    const sndExcedido = document.getElementById("sndExcedido");
 
-    /****************** TEMA (claro/oscuro) ******************/
-    const root = document.documentElement;
-    const almacenamientoTema = localStorage.getItem("eis_tema");
-    if (almacenamientoTema) {
-      root.setAttribute("data-theme", almacenamientoTema);
-    } else if (window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches) {
-      root.setAttribute("data-theme", "light");
-    } else {
-      root.setAttribute("data-theme", "dark");
-    }
-    document.getElementById("btnTema").onclick = () => {
-      const actual = root.getAttribute("data-theme") === "dark" ? "light" : "dark";
-      root.setAttribute("data-theme", actual);
-      localStorage.setItem("eis_tema", actual);
-    };
+    const tarjetas = {};
+    let tarjetaActiva = null; // nombre de la tarjeta seleccionada
 
-    /****************** FULLSCREEN y MODO TV ******************/
-    const btnFullscreen = document.getElementById("btnFullscreen");
-    btnFullscreen.onclick = async () => {
-      if (!document.fullscreenElement) {
-        await document.documentElement.requestFullscreen().catch(() => {});
-      } else {
-        await document.exitFullscreen().catch(() => {});
-      }
-    };
-
-    const btnTV = document.getElementById("btnTV");
-    btnTV.onclick = () => {
-      document.body.classList.toggle("modo-tv");
-      btnTV.classList.toggle("primary");
-    };
-
-    /****************** UI HELPERS ******************/
+    /****************** HELPERS UI ******************/
     const iniciales = (nombre) =>
-      nombre
-        .split(" ")
-        .map(p => p[0]?.toUpperCase())
-        .join("")
-        .slice(0, 2);
+      nombre.split(" ").map(p => p[0]?.toUpperCase()).join("").slice(0,2);
 
-    // animación de cambio de estado (flash)
     const flashTarjeta = (el) => {
       el.classList.remove("flash");
-      void el.offsetWidth; // reflow para reiniciar animación
+      void el.offsetWidth; // reflow
       el.classList.add("flash");
       setTimeout(() => el.classList.remove("flash"), 850);
+    };
+
+    const setActiva = (nombre) => {
+      // quitar activa en todas
+      document.querySelectorAll(".tarjeta").forEach(t => t.classList.remove("activa"));
+      if (!nombre || !tarjetas[nombre]) return;
+      tarjetas[nombre].tarjeta.classList.add("activa");
+      tarjetaActiva = nombre;
     };
 
     /****************** CREAR TARJETAS ******************/
@@ -452,7 +306,7 @@
       const flip = document.createElement("div");
       flip.className = "flip";
 
-      // ---------- FRONTAL ----------
+      // --- FRONTAL ---
       const frontal = document.createElement("div");
       frontal.className = "frontal active";
 
@@ -483,7 +337,7 @@
 
       const estadisticas = document.createElement("div");
       estadisticas.className = "estadisticas";
-      estadisticas.textContent = "Llamadas: 0 | ✅:0 | ❌:0";
+      estadisticas.textContent = "—";
 
       const iconTelefono = document.createElement("div");
       iconTelefono.className = "icon-telefono";
@@ -491,13 +345,13 @@
 
       frontal.append(avatar, spanNombre, estado, tiempoBanio, tiempoAlmuerzo, estadisticas, iconTelefono);
 
-      // ---------- TRASERA ----------
+      // --- TRASERA (se deja por si la usas luego) ---
       const trasera = document.createElement("div");
       trasera.className = "trasera";
 
-      const iconBanio = document.createElement("div");
-      iconBanio.className = "regresar";
-      iconBanio.textContent = "↩";
+      const iconBack = document.createElement("div");
+      iconBack.className = "regresar";
+      iconBack.textContent = "↩";
 
       const registro = document.createElement("div");
       registro.className = "registro";
@@ -506,7 +360,7 @@
       inputNumero.placeholder = "Número de teléfono";
 
       const selectCant = document.createElement("select");
-      ["1", "2"].forEach(val => {
+      ["1","2"].forEach(val => {
         const opt = document.createElement("option");
         opt.value = val;
         opt.text = val + " llamada" + (val === "2" ? "s" : "");
@@ -516,127 +370,132 @@
       const botones = document.createElement("div");
       botones.className = "botones";
       const btnCheck = document.createElement("button");
-      btnCheck.className = "btn-check";
-      btnCheck.textContent = "✅";
+      btnCheck.className = "btn-check"; btnCheck.textContent = "✅";
       const btnX = document.createElement("button");
-      btnX.className = "btn-x";
-      btnX.textContent = "❌";
+      btnX.className = "btn-x"; btnX.textContent = "❌";
       botones.append(btnX, btnCheck);
 
       registro.append(inputNumero, selectCant, botones);
-      trasera.append(iconBanio, registro);
+      trasera.append(iconBack, registro);
+
       flip.append(frontal, trasera);
       tarjeta.appendChild(flip);
       contenedor.appendChild(tarjeta);
 
-      // guardar referencias
-      tarjetas[nombre] = { tarjeta, estado, tiempoBanio, tiempoAlmuerzo, info: {}, estadisticas, frontal, trasera, inputNumero, selectCant, btnCheck, btnX, prevTipo: null };
+      // refs
+      tarjetas[nombre] = {
+        tarjeta, estado, tiempoBanio, tiempoAlmuerzo, info:{},
+        estadisticas, frontal, trasera, inputNumero, selectCant,
+        btnCheck, btnX, prevTipo:null,
+        exceededBanioPlayed:false, exceededAlmuerzoPlayed:false
+      };
 
       // eventos flip
-      iconTelefono.onclick = e => {
-        e.stopPropagation();
-        frontal.classList.remove("active");
-        trasera.classList.add("active");
-      };
-      iconBanio.onclick = e => {
-        e.stopPropagation();
-        trasera.classList.remove("active");
-        frontal.classList.add("active");
-      };
+      iconTelefono.onclick = (e)=>{ e.stopPropagation(); frontal.classList.remove("active"); trasera.classList.add("active"); };
+      iconBack.onclick = (e)=>{ e.stopPropagation(); trasera.classList.remove("active"); frontal.classList.add("active"); };
 
-      btnCheck.onclick = () => registrarLlamada(nombre, true);
-      btnX.onclick = () => registrarLlamada(nombre, false);
-
-      registro.addEventListener("click", e => { e.stopPropagation(); });
-
-      // abrir menú radial
+      // abrir menú radial + seleccionar tarjeta
       tarjeta.addEventListener("click", (e) => {
         e.stopPropagation();
-        if (trasera.classList.contains("active")) return;
+        if (trasera.classList.contains("active")) return; // no abrir si está la trasera
         document.querySelectorAll(".tarjeta").forEach(t => t.classList.remove("dimmed"));
         menuGlobal.classList.remove("active");
         const rect = tarjeta.getBoundingClientRect();
-        menuGlobal.style.top = `${rect.top + rect.height / 2}px`;
-        menuGlobal.style.left = `${rect.left + rect.width / 2}px`;
+        menuGlobal.style.top = `${rect.top + rect.height/2}px`;
+        menuGlobal.style.left = `${rect.left + rect.width/2}px`;
         tarjeta.classList.add("dimmed");
-        tarjetaActiva = nombre;
+        setActiva(nombre); // marcar activa
         menuGlobal.classList.add("active");
-        menuGlobal.setAttribute("aria-hidden", "false");
+        menuGlobal.setAttribute("aria-hidden","false");
       });
+
+      // evitar que clicks adentro de la trasera cierren/propaguen
+      registro.addEventListener("click", e => e.stopPropagation());
     });
 
-    // Cerrar menú radial al hacer click fuera
+    // cerrar menú al hacer click fuera
     document.addEventListener("click", () => {
       menuGlobal.classList.remove("active");
-      menuGlobal.setAttribute("aria-hidden", "true");
+      menuGlobal.setAttribute("aria-hidden","true");
       document.querySelectorAll(".tarjeta").forEach(t => t.classList.remove("dimmed"));
-      tarjetaActiva = null;
     });
 
-    // Acciones del menú radial
+    // === Menú radial: cambios de estado ===
     menuGlobal.querySelector(".btn-libre").onclick    = () => accionMenu(tarjetaActiva, null);
     menuGlobal.querySelector(".btn-banio").onclick    = () => accionMenu(tarjetaActiva, "baño");
     menuGlobal.querySelector(".btn-almuerzo").onclick = () => accionMenu(tarjetaActiva, "almuerzo");
 
-    async function accionMenu(nombre, tipo) {
-      if (!nombre) return;
+    async function accionMenu(nombre, tipo){
+      if(!nombre) return;
       await toggleEstado(nombre, tipo);
     }
 
-    /****************** CAMBIAR ESTADO (Firestore) ******************/
-    async function toggleEstado(nombre, tipo) {
-      if (!nombre) return;
-      const info = tarjetas[nombre].info || { tipo: null, inicio: null, tiempoBanio: 0, tiempoAlmuerzo: 0 };
+    /****************** ESTADO (Firestore) ******************/
+    async function ensureDocInicial() {
+      const snap = await getDoc(refBanio);
+      if (!snap.exists()) {
+        const inicial = {};
+        nombres.forEach(n => {
+          inicial[n] = { tipo:null, inicio:null, tiempoBanio:0, tiempoAlmuerzo:0 };
+        });
+        await setDoc(refBanio, inicial);
+      }
+    }
+    await ensureDocInicial();
+
+    async function toggleEstado(nombre, tipo){
+      const info = tarjetas[nombre].info || { tipo:null, inicio:null, tiempoBanio:0, tiempoAlmuerzo:0 };
       const ahora = Date.now();
+
       const inicioMs = (val) => {
         if (!val && val !== 0) return null;
         if (typeof val === "number") return val;
-        if (val.toMillis) return val.toMillis();
+        if (val?.toMillis) return val.toMillis();
         return null;
       };
 
-      if (info.tipo) {
+      if(info.tipo){
         const ini = inicioMs(info.inicio);
-        const segs = ini ? Math.floor((ahora - ini) / 1000) : 0;
+        const segs = ini ? Math.floor((ahora - ini)/1000) : 0;
         let acBanio = info.tiempoBanio;
         let acAlmuerzo = info.tiempoAlmuerzo;
-        if (info.tipo === "baño") acBanio += segs;
-        if (info.tipo === "almuerzo") acAlmuerzo += segs;
+        if(info.tipo === "baño") acBanio += segs;
+        if(info.tipo === "almuerzo") acAlmuerzo += segs;
 
-        // si misma opción o libre -> limpia
-        if (tipo === info.tipo || tipo === null) {
-          await updateDoc(refBanio, { [nombre]: { tipo: null, inicio: null, tiempoBanio: acBanio, tiempoAlmuerzo: acAlmuerzo } });
+        if (tipo === info.tipo || tipo === null){
+          await updateDoc(refBanio, { [nombre]: { tipo:null, inicio:null, tiempoBanio:acBanio, tiempoAlmuerzo:acAlmuerzo } });
         } else {
-          // cambia a otro tipo
-          await updateDoc(refBanio, { [nombre]: { tipo: tipo, inicio: ahora, tiempoBanio: acBanio, tiempoAlmuerzo: acAlmuerzo } });
+          await updateDoc(refBanio, { [nombre]: { tipo:tipo, inicio:ahora, tiempoBanio:acBanio, tiempoAlmuerzo:acAlmuerzo } });
         }
       } else {
-        if (!tipo) return;
-        await updateDoc(refBanio, { [nombre]: { tipo: tipo, inicio: ahora, tiempoBanio: info.tiempoBanio, tiempoAlmuerzo: info.tiempoAlmuerzo } });
+        if (!tipo) return; // ya está libre
+        await updateDoc(refBanio, { [nombre]: { tipo:tipo, inicio:ahora, tiempoBanio:info.tiempoBanio || 0, tiempoAlmuerzo:info.tiempoAlmuerzo || 0 } });
       }
     }
 
     /****************** ESCUCHAR ESTADO (animado) ******************/
-    onSnapshot(refBanio, (snap) => {
-      if (!snap.exists()) return;
+    onSnapshot(refBanio, (snap)=>{
+      if(!snap.exists()) return;
       const data = snap.data();
-      nombres.forEach(nombre => {
-        const info = data[nombre] || { tipo: null, inicio: null, tiempoBanio: 0, tiempoAlmuerzo: 0 };
+      nombres.forEach(nombre=>{
+        const info = data[nombre] || { tipo:null, inicio:null, tiempoBanio:0, tiempoAlmuerzo:0 };
         const card = tarjetas[nombre];
-        if (!card) return;
+        if(!card) return;
 
-        // detectar cambio para animación
+        // animación si cambió
         const prev = card.prevTipo;
         const nuevo = info.tipo || null;
-        if (prev !== nuevo && card.tarjeta) {
+        if(prev !== nuevo && card.tarjeta){
           flashTarjeta(card.tarjeta);
           card.prevTipo = nuevo;
+          // Al cambiar de estado, resetear "excedido" beep para próxima excedencia
+          if (nuevo !== "baño") card.exceededBanioPlayed = false;
+          if (nuevo !== "almuerzo") card.exceededAlmuerzoPlayed = false;
         }
 
         card.info = info;
-
-        if (info.tipo) {
-          card.estado.textContent = info.tipo === "baño" ? "En Baño" : "Almorzando";
+        if(info.tipo){
+          card.estado.textContent = (info.tipo === "baño") ? "En Baño" : "Almorzando";
           card.estado.className = "estado ocupado";
         } else {
           card.estado.textContent = "Libre";
@@ -645,136 +504,68 @@
       });
     });
 
-    /****************** CRONÓMETROS ******************/
-    setInterval(() => {
+    /****************** CRONÓMETROS + SONIDO EXCEDIDO ******************/
+    setInterval(()=>{
       const ahora = Date.now();
-      nombres.forEach(nombre => {
-        const info = tarjetas[nombre].info;
-        if (!info) return;
+      nombres.forEach(nombre=>{
+        const card = tarjetas[nombre];
+        if(!card) return;
+        const info = card.info || {};
+        let tBanio = info.tiempoBanio || 0;
+        let tAlmuerzo = info.tiempoAlmuerzo || 0;
 
-        let tBanio = info.tiempoBanio || 0, tAlmuerzo = info.tiempoAlmuerzo || 0;
         const inicioVal = info.inicio;
-        const inicioMs = (inicioVal && inicioVal.toMillis) ? inicioVal.toMillis() : (typeof inicioVal === "number" ? inicioVal : null);
+        const ini = (inicioVal && inicioVal.toMillis) ? inicioVal.toMillis() : (typeof inicioVal === "number" ? inicioVal : null);
 
-        if (info.tipo === "baño" && inicioMs) tBanio += Math.floor((ahora - inicioMs) / 1000);
-        if (info.tipo === "almuerzo" && inicioMs) tAlmuerzo += Math.floor((ahora - inicioMs) / 1000);
+        if(info.tipo === "baño" && ini) tBanio += Math.floor((ahora - ini)/1000);
+        if(info.tipo === "almuerzo" && ini) tAlmuerzo += Math.floor((ahora - ini)/1000);
 
-        const minB = Math.floor(tBanio / 60), secB = tBanio % 60;
-        const minA = Math.floor(tAlmuerzo / 60), secA = tAlmuerzo % 60;
+        const minB = Math.floor(tBanio/60), secB = tBanio % 60;
+        const minA = Math.floor(tAlmuerzo/60), secA = tAlmuerzo % 60;
 
-        tarjetas[nombre].tiempoBanio.innerHTML = `Baño: <span class="cronometro">${minB}:${secB.toString().padStart(2, "0")}</span>`;
-        tarjetas[nombre].tiempoAlmuerzo.innerHTML = `Almuerzo: <span class="cronometro">${minA}:${secA.toString().padStart(2, "0")}</span>`;
+        card.tiempoBanio.innerHTML    = `Baño: <span class="cronometro">${minB}:${secB.toString().padStart(2,"0")}</span>`;
+        card.tiempoAlmuerzo.innerHTML = `Almuerzo: <span class="cronometro">${minA}:${secA.toString().padStart(2,"0")}</span>`;
 
-        if (info.tipo === "baño" && tBanio > LIMITE.baño) {
-          tarjetas[nombre].estado.className = "estado excedido";
-          tarjetas[nombre].estado.textContent = "Baño excedido";
+        // Excedido + sonido (una sola vez por excedencia)
+        if(info.tipo === "baño" && tBanio > LIMITE.baño){
+          if (!card.exceededBanioPlayed){
+            sndExcedido.currentTime = 0;
+            sndExcedido.play().catch(()=>{ /* ignorar bloqueo autoplay */ });
+            card.exceededBanioPlayed = true;
+          }
+          card.estado.className = "estado excedido";
+          card.estado.textContent = "Baño excedido";
         }
-        if (info.tipo === "almuerzo" && tAlmuerzo > LIMITE.almuerzo) {
-          tarjetas[nombre].estado.className = "estado excedido";
-          tarjetas[nombre].estado.textContent = "Almuerzo excedido";
+        if(info.tipo === "almuerzo" && tAlmuerzo > LIMITE.almuerzo){
+          if (!card.exceededAlmuerzoPlayed){
+            sndExcedido.currentTime = 0;
+            sndExcedido.play().catch(()=>{ /* ignorar bloqueo autoplay */ });
+            card.exceededAlmuerzoPlayed = true;
+          }
+          card.estado.className = "estado excedido";
+          card.estado.textContent = "Almuerzo excedido";
         }
       });
     }, 1000);
 
-    /****************** REGISTRO LLAMADAS ******************/
-    async function registrarLlamada(nombre, respondio) {
-      const tar = tarjetas[nombre];
-      const numero = tar.inputNumero.value.trim();
-      const cant = Number(tar.selectCant.value);
-      if (!numero) { alert("Número obligatorio"); return; }
-
-      try {
-        for (let i = 0; i < cant; i++) {
-          await addDoc(collection(db, "llamadas"), {
-            agente: nombre,
-            numero,
-            respondio,
-            cantidad: 1,
-            timestamp: serverTimestamp()
-          });
-        }
-        tar.inputNumero.value = "";
-        tar.selectCant.value = "1";
-      } catch (e) {
-        console.error(e);
-      }
-    }
-
-    /****************** ESCUCHAR LLAMADAS (stats) ******************/
-    onSnapshot(collection(db, "llamadas"), (snapshot) => {
-      const llamadasPorAgente = {};
-      snapshot.forEach((doc) => {
-        const data = doc.data();
-        if (!llamadasPorAgente[data.agente]) llamadasPorAgente[data.agente] = { total: 0, exito: 0, fallo: 0 };
-        llamadasPorAgente[data.agente].total++;
-        data.respondio ? llamadasPorAgente[data.agente].exito++ : llamadasPorAgente[data.agente].fallo++;
-      });
-
-      nombres.forEach((nombre) => {
-        const stats = llamadasPorAgente[nombre] || { total: 0, exito: 0, fallo: 0 };
-        if (tarjetas[nombre]) {
-          tarjetas[nombre].estadisticas.textContent =
-            `Llamadas: ${stats.total} | ✅:${stats.exito} | ❌:${stats.fallo}`;
-        }
-      });
-    });
-
-    /****************** EXCEL ******************/
-    document.getElementById("btnDescargarExcel").onclick = async () => {
-      const llamadasSnapshot = await getDocs(collection(db, "llamadas"));
-      const data = llamadasSnapshot.docs.map(d => {
-        const item = d.data();
-        const fecha = item.timestamp?.toDate ? item.timestamp.toDate().toLocaleString() : "";
-        return { Agente: item.agente, Numero: item.numero, Respondió: item.respondio ? "✅" : "❌", Fecha: fecha };
-      });
-
-      if (!data.length) return alert("No hay llamadas registradas.");
-
-      const ws = XLSX.utils.json_to_sheet(data);
-      const wb = XLSX.utils.book_new();
-      XLSX.utils.book_append_sheet(wb, ws, "Llamadas");
-      XLSX.writeFile(wb, `llamadas_salientes_${new Date().toLocaleDateString().replace(/\//g, "-")}.xlsx`);
-    };
-
-    /****************** RESET oculto (Shift + Q) ******************/
-    const btnReset = document.getElementById("btnResetTodo");
-
-    // Mostrar/ocultar con Shift + Q
+    /****************** ATAJOS DE TECLADO ******************/
+    // L: Libre, B: Baño, A: Almuerzo (sobre tarjeta activa)
     document.addEventListener("keydown", (e) => {
-      if (e.shiftKey && e.key.toLowerCase() === "q") {
-        btnReset.classList.toggle("visible");
+      const key = e.key.toLowerCase();
+      if (["l","b","a","c"].includes(key)) e.preventDefault();
+
+      if (key === "c") {
+        // Modo compacto
+        document.body.classList.toggle("compacto");
+        return;
       }
+      if (!tarjetaActiva) return; // no hay tarjeta seleccionada
+
+      if (key === "l") accionMenu(tarjetaActiva, null);
+      if (key === "b") accionMenu(tarjetaActiva, "baño");
+      if (key === "a") accionMenu(tarjetaActiva, "almuerzo");
     });
 
-    // Acción de reset (igual a tu lógica)
-    btnReset.onclick = async () => {
-      if (!confirm("¿Seguro que deseas REINICIAR todo (tiempos y llamadas)?")) return;
-
-      const resetData = {};
-      nombres.forEach((nombre) => {
-        const card = tarjetas[nombre];
-        if (card) {
-          card.info.tiempoBanio = 0;
-          card.info.tiempoAlmuerzo = 0;
-          card.info.tipo = null;
-          card.info.inicio = null;
-          card.estado.textContent = "Libre";
-          card.estado.className = "estado libre";
-          card.tiempoBanio.innerHTML = `Baño: <span class='cronometro'>0:00</span>`;
-          card.tiempoAlmuerzo.innerHTML = `Almuerzo: <span class='cronometro'>0:00</span>`;
-        }
-        resetData[nombre] = { tipo: null, inicio: null, tiempoBanio: 0, tiempoAlmuerzo: 0 };
-      });
-
-      await updateDoc(refBanio, resetData);
-
-      const llamadasSnapshot = await getDocs(collection(db, "llamadas"));
-      for (const docSnap of llamadasSnapshot.docs) {
-        await deleteDoc(doc(db, "llamadas", docSnap.id));
-      }
-
-      alert("Todo se ha reiniciado correctamente ✅");
-    };
   </script>
 </body>
 </html>
