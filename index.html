@@ -3,9 +3,8 @@
 
 <head>
   <meta charset="UTF-8" />
-  <title>EIS — Panel de Agentes</title>
+  <title>EIS — Panel de Agentes (Sincronizado)</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <link rel="icon" href="https://cdn-icons-png.flaticon.com/128/1302/1302539.png" type="image/png">
   <style>
     :root{
       --bg: #0b1220;
@@ -21,283 +20,145 @@
       --chip-free:#16a34a;
       --chip-busy:#facc15;
       --chip-over:#ef4444;
-      --ring:#3b82f6;
-      --glass: rgba(255,255,255,.06);
       --shadow: 0 10px 30px rgba(0,0,0,.45);
       --radius: 14px;
     }
-
-    /* ===== Base ===== */
     *{ box-sizing: border-box; }
     html,body{
       height:100%;
       margin:0;
       background: radial-gradient(1200px 600px at 15% 0%, #0b182e 0%, var(--bg) 40%, #050914 100%);
       color: var(--text);
-      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial, "Noto Sans", "Apple Color Emoji","Segoe UI Emoji";
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial, "Noto Sans";
     }
-
     header.app{
-      width:100%;
-      max-width: 1400px;
-      margin: 24px auto 12px auto;
-      padding: 0 16px;
-      display:flex;
-      align-items: center;
-      gap:14px;
+      width:100%; max-width: 1400px; margin: 24px auto 12px auto; padding: 0 16px;
+      display:flex; align-items:center; gap:14px;
     }
-    .brand{
-      display:flex;
-      align-items:center;
-      gap:12px;
-    }
+    .brand{ display:flex; align-items:center; gap:12px; }
     .brand .logo{
-      width:38px;height:38px;border-radius:10px;
-      display:grid;place-items:center;
+      width:38px;height:38px;border-radius:10px; display:grid;place-items:center;
       background: linear-gradient(145deg,#1f3b77,#133061);
       box-shadow: inset 0 0 0 1px rgba(255,255,255,.06), var(--shadow);
     }
-    .title{
-      display:flex;flex-direction:column;line-height:1.1;
-    }
-    .title h1{
-      margin:0;font-size:22px;font-weight:800; letter-spacing:.2px;
-    }
-    .title .subtitle{
-      color:var(--muted); font-size:12px;
-    }
+    .title{ display:flex; flex-direction:column; line-height:1.1; }
+    .title h1{ margin:0; font-size:22px; font-weight:800; letter-spacing:.2px; }
+    .title .subtitle{ color:var(--muted); font-size:12px; }
 
-    /* Info bar (hora servidor) */
     .info-bar{
-      margin-left:auto;
-      display:flex;align-items:center;gap:12px;
-      color:var(--muted); font-size:13px;
-      padding:8px 12px;
-      border-radius:999px;
+      margin-left:auto; display:flex; align-items:center; gap:12px;
+      color:var(--muted); font-size:13px; padding:8px 12px; border-radius:999px;
       background: linear-gradient(145deg, rgba(255,255,255,.06), rgba(255,255,255,.03));
-      border: 1px solid rgba(255,255,255,.07);
-      box-shadow: var(--shadow);
+      border: 1px solid rgba(255,255,255,.07); box-shadow: var(--shadow);
     }
-    .dot{
-      width:8px;height:8px;border-radius:50%;background: var(--success);
-      box-shadow: 0 0 10px var(--success);
-    }
-    .sep{
-      width:1px;height:14px;background: rgba(255,255,255,.12);
-    }
+    .dot{ width:8px;height:8px;border-radius:50%; background: var(--success); box-shadow: 0 0 10px var(--success); }
+    .sep{ width:1px;height:14px;background: rgba(255,255,255,.12); }
 
-    /* ===== Grid ===== */
     .contenedor{
-      width:100%;
-      max-width:1400px;
-      margin: 8px auto 80px auto;
-      padding: 0 16px;
-      display:grid;
-      grid-template-columns: repeat(7, minmax(160px,1fr));
-      gap:14px;
+      width:100%; max-width:1400px; margin: 8px auto 80px auto; padding: 0 16px;
+      display:grid; grid-template-columns: repeat(7, minmax(160px,1fr)); gap:14px;
     }
-    @media (max-width: 1280px){
-      .contenedor{ grid-template-columns: repeat(5, minmax(180px,1fr));}
-    }
-    @media (max-width: 1024px){
-      .contenedor{ grid-template-columns: repeat(4, minmax(180px,1fr));}
-    }
-    @media (max-width: 860px){
-      .contenedor{ grid-template-columns: repeat(3, minmax(190px,1fr));}
-    }
-    @media (max-width: 640px){
-      .contenedor{ grid-template-columns: repeat(2, minmax(200px,1fr));}
-    }
-    @media (max-width: 460px){
-      .contenedor{ grid-template-columns: 1fr;}
-    }
+    @media (max-width: 1280px){ .contenedor{ grid-template-columns: repeat(5, minmax(180px,1fr)); } }
+    @media (max-width: 1024px){ .contenedor{ grid-template-columns: repeat(4, minmax(180px,1fr)); } }
+    @media (max-width: 860px){ .contenedor{ grid-template-columns: repeat(3, minmax(190px,1fr)); } }
+    @media (max-width: 640px){ .contenedor{ grid-template-columns: repeat(2, minmax(200px,1fr)); } }
+    @media (max-width: 460px){ .contenedor{ grid-template-columns: 1fr; } }
 
-    /* ===== Card ===== */
     .tarjeta{
-      position:relative;
-      background: linear-gradient(175deg, var(--card), var(--card-2));
-      border-radius: var(--radius);
-      padding: 16px 12px 14px 12px;
-      box-shadow: var(--shadow);
-      border: 1px solid rgba(255,255,255,.06);
-      overflow: hidden;
-      cursor: pointer;
-      transition: transform .15s ease, box-shadow .2s ease, border-color .2s ease;
-      isolation: isolate;
+      position:relative; background: linear-gradient(175deg, var(--card), var(--card-2));
+      border-radius: var(--radius); padding: 14px 12px 14px 12px; box-shadow: var(--shadow);
+      border: 1px solid rgba(255,255,255,.06); overflow: hidden; cursor: pointer;
+      transition: transform .15s ease, box-shadow .2s ease, border-color .2s ease; isolation: isolate;
     }
-    .tarjeta::before{
-      content:"";
-      position:absolute; inset: -2px;
-      background: radial-gradient(400px 120px at 20% -20%, rgba(99,102,241,.18), transparent 40%),
-                  radial-gradient(320px 140px at 120% -30%, rgba(56,189,248,.22), transparent 38%);
-      z-index:0; opacity:.6; pointer-events:none;
-    }
-    .tarjeta:hover{
-      transform: translateY(-2px);
-      box-shadow: 0 14px 36px rgba(0,0,0,.55);
-      border-color: rgba(99,102,241,.25);
-    }
-    .flip{ position:relative; min-height: 156px; }
-    .frontal,.trasera{
-      position:absolute; inset:0; padding-top:4px;
-      backface-visibility: hidden;
-      transition: opacity .28s ease, transform .28s ease;
-      width:100%;
-    }
-    .frontal{ opacity:0; transform: scale(.98);}
-    .frontal.active{ opacity:1; transform: scale(1); position:relative; z-index:2;}
-    .trasera{ opacity:0; transform: scale(.98);}
-    .trasera.active{ opacity:1; transform: scale(1); position:relative; z-index:2;}
+    .tarjeta:hover{ transform: translateY(-2px); box-shadow: 0 14px 36px rgba(0,0,0,.55); border-color: rgba(99,102,241,.25); }
+    .flip{ position:relative; min-height: 170px; }
+    .frontal,.trasera{ position:absolute; inset:0; padding-top:4px; backface-visibility:hidden; transition: opacity .28s ease, transform .28s ease; width:100%; }
+    .frontal{ opacity:0; transform: scale(.98); }
+    .frontal.active{ opacity:1; transform: scale(1); position:relative; z-index:2; }
+    .trasera{ opacity:0; transform: scale(.98); }
+    .trasera.active{ opacity:1; transform: scale(1); position:relative; z-index:2; }
 
-    /* Header dentro de card */
-    .card-head{
-      display:flex; align-items:center; gap:8px; margin-bottom:8px;
-    }
+    .card-head{ display:flex; align-items:center; gap:8px; margin-bottom:8px; }
     .avatar{
       width:34px;height:34px;border-radius:10px; display:grid;place-items:center;
       background: linear-gradient(145deg, #1e293b, #0b1220);
-      color:#93c5fd; font-weight:800; font-size:13px;
-      border:1px solid rgba(255,255,255,.06);
-      box-shadow: inset 0 0 0 1px rgba(255,255,255,.03);
+      color:#93c5fd; font-weight:800; font-size:13px; border:1px solid rgba(255,255,255,.06);
       user-select:none;
     }
-    .nombre{
-      font-size:15px;font-weight:700; letter-spacing:.2px;
-      text-align:left; flex:1; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
-    }
+    .nombre{ font-size:15px;font-weight:700; letter-spacing:.2px; text-align:left; flex:1; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
     .login-superior{
-      font-size:11px; font-weight:700;
-      padding:4px 8px; border-radius:999px;
-      border:1px solid rgba(255,255,255,.08);
-      background: linear-gradient(145deg, rgba(34,197,94,.15), rgba(34,197,94,.08));
-      color:#86efac;
+      font-size:11px; font-weight:700; padding:4px 8px; border-radius:999px; border:1px solid rgba(255,255,255,.08);
+      background: linear-gradient(145deg, rgba(34,197,94,.18), rgba(34,197,94,.08)); color:#bbf7d0;
     }
-    .login-tarde{
-      background: linear-gradient(145deg, rgba(239,68,68,.18), rgba(239,68,68,.08));
-      color:#fecaca;
-    }
-    .login-puntual{
-      background: linear-gradient(145deg, rgba(34,197,94,.18), rgba(34,197,94,.08));
-      color:#bbf7d0;
-    }
+    .login-tarde{ background: linear-gradient(145deg, rgba(239,68,68,.18), rgba(239,68,68,.08)); color:#fecaca; }
+    .login-puntual{ background: linear-gradient(145deg, rgba(34,197,94,.18), rgba(34,197,94,.08)); color:#bbf7d0; }
 
     .estado{
-      display:inline-flex; align-items:center; gap:8px;
-      font-size:12px; font-weight:800; letter-spacing:.3px;
-      margin: 6px 0 8px 0;
-      padding: 6px 10px; border-radius: 10px;
-      border:1px solid rgba(255,255,255,.08);
-      background: linear-gradient(145deg, rgba(255,255,255,.06), rgba(255,255,255,.03));
-      color: #e2e8f0;
+      display:inline-flex; align-items:center; gap:8px; font-size:12px; font-weight:800; letter-spacing:.3px;
+      margin: 6px 0 8px 0; padding: 6px 10px; border-radius: 10px;
+      border:1px solid rgba(255,255,255,.08); background: linear-gradient(145deg, rgba(255,255,255,.06), rgba(255,255,255,.03)); color: #e2e8f0;
     }
-    .estado .dot-sm{
-      width:10px;height:10px;border-radius:50%;
-      box-shadow: 0 0 10px currentColor;
-    }
+    .estado .dot-sm{ width:10px;height:10px;border-radius:50%; box-shadow: 0 0 10px currentColor; }
     .estado.libre{ color:#86efac; }
-    .estado.libre .dot-sm{ background: var(--chip-free);}
+    .estado.libre .dot-sm{ background: var(--chip-free); }
     .estado.ocupado{ color:#fef08a; animation: pulse 1.2s infinite; }
     .estado.ocupado .dot-sm{ background: var(--chip-busy); }
     .estado.excedido{ color:#fecaca; animation: pulse 1.2s infinite; }
     .estado.excedido .dot-sm{ background: var(--chip-over); }
+    @keyframes pulse{ 0%{ transform: scale(1); } 50%{ transform: scale(1.04); } 100%{ transform: scale(1); } }
 
-    @keyframes pulse{
-      0%{ transform: translateZ(0) scale(1); }
-      50%{ transform: translateZ(0) scale(1.04); }
-      100%{ transform: translateZ(0) scale(1); }
-    }
-
-    .timers{
-      display:grid; grid-template-columns: 1fr 1fr; gap:10px;
-      width:100%;
-    }
-    .timer{
-      background: linear-gradient(145deg, rgba(255,255,255,.06), rgba(255,255,255,.02));
-      border:1px solid rgba(255,255,255,.08);
-      border-radius: 10px; padding:8px 10px;
-      display:flex; flex-direction:column; gap:4px;
-    }
+    .timers{ display:grid; grid-template-columns: 1fr 1fr; gap:10px; width:100%; }
+    .timer{ background: linear-gradient(145deg, rgba(255,255,255,.06), rgba(255,255,255,.02)); border:1px solid rgba(255,255,255,.08);
+      border-radius: 10px; padding:8px 10px; display:flex; flex-direction:column; gap:4px; }
     .t-label{ color: var(--muted); font-size:11px; font-weight:700; letter-spacing:.4px; text-transform:uppercase;}
     .t-value{ font-variant-numeric: tabular-nums; font-weight:800; color:#facc15; font-size:16px; }
 
     .estadisticas{
-      margin-top:8px; font-size:12.5px; font-weight:700; color:#cbd5e1;
-      display:flex; align-items:center; justify-content:center; gap:8px;
-      padding:6px 8px; border-radius:10px;
-      background: linear-gradient(145deg, rgba(148,163,184,.15), rgba(148,163,184,.06));
-      border:1px solid rgba(255,255,255,.06);
+      margin-top:8px; font-size:12.5px; font-weight:700; color:#cbd5e1; display:flex; align-items:center; justify-content:space-between; gap:8px;
+      padding:6px 8px; border-radius:10px; background: linear-gradient(145deg, rgba(148,163,184,.15), rgba(148,163,184,.06)); border:1px solid rgba(255,255,255,.06);
     }
+    .estadisticas .chips{ display:flex; gap:10px; align-items:center; }
     .estadisticas .chip{ display:flex; align-items:center; gap:6px; }
     .estadisticas .chip .i{ filter: drop-shadow(0 0 6px rgba(255,255,255,.15)); }
 
-    .icon-telefono{
-      position:absolute; top:10px; right:10px; z-index:3;
-      font-size:18px; cursor:pointer; user-select:none;
-      opacity:.85; transition: transform .15s ease, opacity .2s ease;
+    /* Botón dentro de la tarjeta para registrar llamadas (reemplaza el emoji superpuesto) */
+    .btn-registrar{
+      margin-left:auto; padding:6px 10px; border-radius:9px; border:1px solid rgba(255,255,255,.08);
+      background: linear-gradient(145deg, rgba(255,255,255,.06), rgba(255,255,255,.03)); color:white; font-weight:700; font-size:12px; cursor:pointer;
+      transition: transform .12s ease, box-shadow .15s ease, background .2s ease;
     }
-    .icon-telefono:hover{ transform: scale(1.1); opacity:1; }
-
-    .regresar{
-      position:absolute; top:10px; right:10px; z-index:3;
-      font-size:20px; cursor:pointer; user-select:none;
-      opacity:.9; transition: transform .15s ease;
-    }
-    .regresar:hover{ transform: scale(1.1); }
+    .btn-registrar:hover{ transform: translateY(-1px); box-shadow: 0 12px 28px rgba(0,0,0,.5); }
 
     .registro{
-      display:flex; flex-direction:column; gap:8px;
-      margin-top: 8px; width:100%;
-      padding:8px; background: rgba(255,255,255,.03); border-radius:10px;
-      border:1px solid rgba(255,255,255,.06);
+      display:flex; flex-direction:column; gap:8px; margin-top: 8px; width:100%; padding:8px;
+      background: rgba(255,255,255,.03); border-radius:10px; border:1px solid rgba(255,255,255,.06);
     }
     .registro select,.registro input{
       width:100%; height:36px; border-radius:9px; border:1px solid rgba(255,255,255,.08);
-      background: rgba(15,23,42,.6); color: var(--text);
-      padding: 6px 10px; font-size:14px; outline: none;
-      transition: border-color .15s ease, box-shadow .15s ease;
+      background: rgba(15,23,42,.6); color: var(--text); padding: 6px 10px; font-size:14px; outline: none;
     }
-    .registro select:focus, .registro input:focus{
-      border-color: rgba(99,102,241,.35);
-      box-shadow: 0 0 0 3px rgba(99,102,241,.15);
-    }
-    .botones{
-      display:flex; justify-content: center; gap:12px; margin-top:4px;
-    }
+    .botones{ display:flex; justify-content: flex-end; gap:8px; }
     .botones button{
-      width:40px; height:40px; border-radius:12px; border:1px solid rgba(255,255,255,.08);
-      background: linear-gradient(145deg, rgba(255,255,255,.06), rgba(255,255,255,.03));
-      color:white; font-size:18px; cursor:pointer;
-      transition: transform .12s ease, box-shadow .15s ease, background .2s ease;
-      box-shadow: var(--shadow);
+      padding:8px 12px; border-radius:10px; border:1px solid rgba(255,255,255,.08);
+      background: linear-gradient(145deg, rgba(255,255,255,.06), rgba(255,255,255,.03)); color:white; font-weight:700; cursor:pointer;
     }
-    .botones button:hover{ transform: translateY(-1px); box-shadow: 0 12px 28px rgba(0,0,0,.5);}
     .btn-check{ background: linear-gradient(145deg, rgba(34,197,94,.22), rgba(34,197,94,.08)); }
-    .btn-x{ background: linear-gradient(145deg, rgba(239,68,68,.22), rgba(239,68,68,.08)); }
+    .btn-x{ background: linear-gradient(145deg, rgba(239,68,68,.22), rgba(239,68,68,.08)); display:none; }
 
     .tarjeta.dimmed{ filter: brightness(.88) saturate(.95); transform: scale(.99); }
 
-    /* ===== Menú radial ===== */
     .menu-radial{
-      position: fixed;
-      transform: translate(-50%, -50%) scale(.92);
-      transition: transform .22s ease, opacity .2s ease;
+      position: fixed; transform: translate(-50%, -50%) scale(.92); transition: transform .22s ease, opacity .2s ease;
       pointer-events: none; z-index: 2000; opacity:0;
     }
-    .menu-radial.active{
-      transform: translate(-50%, -50%) scale(1);
-      pointer-events: auto; opacity:1;
-    }
+    .menu-radial.active{ transform: translate(-50%, -50%) scale(1); pointer-events: auto; opacity:1; }
     .menu-radial::before{
-      content:"";
-      position: absolute; inset:-22px;
-      background: radial-gradient(220px 220px at 50% 50%, rgba(37,99,235,.14), transparent 60%);
+      content:""; position: absolute; inset:-22px; background: radial-gradient(220px 220px at 50% 50%, rgba(37,99,235,.14), transparent 60%);
       filter: blur(8px); z-index:-1;
     }
     .menu-radial button{
-      position: absolute; width:60px; height:60px; border:1px solid rgba(255,255,255,.08);
-      border-radius:16px; color:white; font-weight:800; cursor:pointer; font-size:22px;
-      transition: transform .12s ease, box-shadow .15s ease, background .2s ease;
-      background: linear-gradient(145deg, rgba(255,255,255,.08), rgba(255,255,255,.03));
+      position: absolute; width:60px; height:60px; border:1px solid rgba(255,255,255,.08); border-radius:16px; color:white; font-weight:800; cursor:pointer; font-size:22px;
+      transition: transform .12s ease, box-shadow .15s ease, background .2s ease; background: linear-gradient(145deg, rgba(255,255,255,.08), rgba(255,255,255,.03));
       box-shadow: var(--shadow);
     }
     .menu-radial button:hover{ transform: scale(1.08); box-shadow: 0 16px 34px rgba(0,0,0,.55); }
@@ -305,34 +166,24 @@
     .btn-banio{ background: linear-gradient(145deg, rgba(245,158,11,.3), rgba(245,158,11,.12)); top:10px; left:-70px; font-size:18px; color:#111827; font-weight:900;}
     .btn-almuerzo{ background: linear-gradient(145deg, rgba(99,102,241,.3), rgba(99,102,241,.12)); top:10px; left:50px;}
 
-    /* ===== Botones flotantes ===== */
-    .fab{
-      position: fixed; top: 14px; right: 14px;
-      display:flex; gap:10px; z-index: 3000;
-    }
+    .fab{ position: fixed; top: 14px; right: 14px; display:flex; gap:10px; z-index: 3000; }
     .fab button{
       padding:10px 12px; border-radius:12px; border:1px solid rgba(255,255,255,.08);
       background: linear-gradient(145deg, rgba(255,255,255,.08), rgba(255,255,255,.03));
-      color:white; font-weight:700; letter-spacing:.2px;
-      box-shadow: var(--shadow); cursor:pointer;
-      transition: transform .12s ease, box-shadow .15s ease, opacity .2s ease;
-      opacity:0;
+      color:white; font-weight:700; letter-spacing:.2px; box-shadow: var(--shadow); cursor:pointer;
+      transition: transform .12s ease, box-shadow .15s ease, opacity .2s ease; opacity:0;
     }
     .fab button.show{ opacity:1; }
     .fab button:hover{ transform: translateY(-1px); box-shadow: 0 14px 34px rgba(0,0,0,.55); }
 
-    /* Alerta baño */
     .alerta-banio{
-      position: fixed; top: 10%; left: 50%;
-      transform: translate(-50%, -50%) scale(.9);
-      background: linear-gradient(165deg,#0b1220,#0d1320);
-      color:white; padding: 26px 32px; border-radius:16px; font-size:18px; font-weight:800;
+      position: fixed; top: 10%; left: 50%; transform: translate(-50%, -50%) scale(.9);
+      background: linear-gradient(165deg,#0b1220,#0d1320); color:white; padding: 26px 32px; border-radius:16px; font-size:18px; font-weight:800;
       text-align:center; border: 1px solid rgba(255,255,255,.08);
       box-shadow: 0 0 0 3px rgba(239,68,68,.15), 0 20px 60px rgba(0,0,0,.6);
       z-index: 2500; opacity: 0; pointer-events: none; transition: all .22s ease;
     }
     .alerta-banio.show{ opacity:1; transform: translate(-50%, -50%) scale(1); }
-
   </style>
 </head>
 
@@ -342,10 +193,10 @@
       <div class="logo">📞</div>
       <div class="title">
         <h1>EIS — Panel de Agentes</h1>
-        <div class="subtitle">Control visual de estados y llamadas en tiempo real</div>
+        <div class="subtitle">Estados y llamadas sincronizados a hora de servidor</div>
       </div>
     </div>
-    <div class="info-bar" id="infoBar">
+    <div class="info-bar">
       <span class="dot"></span>
       <span id="serverClock">Sincronizando…</span>
       <span class="sep"></span>
@@ -370,12 +221,12 @@
   </div>
 
   <script type="module">
-    import { increment } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore.js";
     import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-app.js";
     import {
       getFirestore, doc, setDoc, updateDoc, onSnapshot, collection,
       getDocs, addDoc, serverTimestamp, deleteDoc
     } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore.js";
+    import { increment } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore.js";
     import * as XLSX from "https://cdn.jsdelivr.net/npm/xlsx@0.18.5/+esm";
 
     /* =========================
@@ -393,21 +244,50 @@
     const db = getFirestore(app);
 
     /* =========================
-       Sincronización de hora
+       Sincronización de hora (AUTÉNTICA)
+       Escribimos en /_sync/clock -> now: serverTimestamp()
+       y usamos ese valor para calcular desfaseServidor.
     ========================== */
     let desfaseServidor = 0;
     const getServerNow = () => Date.now() + desfaseServidor;
-    const infoBar = document.getElementById("serverClock");
 
-    function tickServerClock(){
-      const d = new Date(getServerNow());
-      const fmt = d.toLocaleString("es-GT", { timeZone: "America/Guatemala", hour12:false });
-      if (infoBar) infoBar.textContent = fmt;
+    const refClock = doc(db, "_sync", "clock");
+
+    async function pingServerClock(){
+      try{
+        // Escribimos ahora=serverTimestamp para que el servidor ponga la hora
+        await setDoc(refClock, { now: serverTimestamp() }, { merge: true });
+      }catch(err){
+        console.error("No se pudo escribir en _sync/clock:", err);
+      }
     }
-    setInterval(tickServerClock, 1000);
+
+    // Nos suscribimos para leer la hora del servidor cuando el write sea confirmado
+    onSnapshot(refClock, (snap)=>{
+      const data = snap.data();
+      if (!data) return;
+      // Solo usamos el valor cuando NO hay escrituras pendientes (confirmado por servidor)
+      if (snap.metadata.hasPendingWrites) return;
+      const serverNowTs = data.now;
+      const ms = typeof serverNowTs?.toMillis === "function" ? serverNowTs.toMillis() : null;
+      if (ms){
+        desfaseServidor = ms - Date.now();
+      }
+    });
+
+    // Hacemos un ping inicial y uno cada 30s para mantener el desfase fino
+    pingServerClock();
+    setInterval(pingServerClock, 30000);
+
+    // Reloj visual
+    const infoBar = document.getElementById("serverClock");
+    setInterval(()=>{
+      const d = new Date(getServerNow());
+      infoBar.textContent = d.toLocaleString("es-GT", { timeZone: "America/Guatemala", hour12:false });
+    }, 1000);
 
     /* =========================
-       Datos y refs
+       Datos
     ========================== */
     const nombres = ["Nestor","Daniel","Andres","Rafael","Alejandro","Tania","Marta","Pablo","Saraí","Michi","Evelyn","Merlin","Ashley","Gabriela","Bryan","Diego","Jorge","Joselyne","Andrea","Omar","Javier","Synndy","Anthony","Mildred","Madelin","Majo","Monica","Jackeline"];
 
@@ -443,9 +323,9 @@
     ];
 
     function obtenerHorarioAgente(agente){
-      const hoy = new Date(getServerNow()).getDay();
+      const hoy = new Date(getServerNow()).getDay(); // usar hora servidor
       if (agente.days) return agente.days[hoy];
-      if (hoy === 6) return agente.sabado;
+      if (hoy === 6) return agente.sabado; // sábado
       return agente.default;
     }
 
@@ -459,7 +339,6 @@
     };
 
     const LIMITE = { baño: 15 * 60, almuerzo: 60 * 60 };
-
     const contenedor = document.getElementById("contenedor");
     const tarjetas = {};
     const menuGlobal = document.getElementById("menuGlobal");
@@ -473,23 +352,22 @@
       setTimeout(()=> alerta.classList.remove("show"), 2500);
     }
 
-    // Util: convertir inicio a ms
     function inicioToMs(val){
       if (val == null) return null;
       if (typeof val.toMillis === "function") return val.toMillis();
-      if (typeof val === "number") return val;
+      if (typeof val === "number") return val; // compatibilidad
       return null;
     }
 
-    /* =========================
-       UI: Construcción de tarjetas
-    ========================== */
     function initialsFromName(n){
       const p = n.split(/\s+/).filter(Boolean);
       if (p.length === 1) return p[0].slice(0,2).toUpperCase();
       return (p[0][0] + p[1][0]).toUpperCase();
     }
 
+    /* =========================
+       Construir tarjetas
+    ========================== */
     nombres.forEach(nombre=>{
       const card = document.createElement("div");
       card.className = "tarjeta";
@@ -497,7 +375,6 @@
       const flip = document.createElement("div");
       flip.className = "flip";
 
-      // Frontal
       const frontal = document.createElement("div");
       frontal.className = "frontal active";
 
@@ -537,27 +414,21 @@
 
       const estadisticas = document.createElement("div");
       estadisticas.className = "estadisticas";
-      estadisticas.innerHTML = `
+      const chips = document.createElement("div");
+      chips.className = "chips";
+      chips.innerHTML = `
         <span class="chip"><span class="i">📞⬅️</span> <span class="v">0</span></span>
-        <span>·</span>
         <span class="chip"><span class="i">📞➡️</span> <span class="v">0</span></span>
       `;
+      const btnRegistrar = document.createElement("button");
+      btnRegistrar.className = "btn-registrar";
+      btnRegistrar.textContent = "Registrar llamadas";
+      estadisticas.append(chips, btnRegistrar);
 
-      const iconTelefono = document.createElement("div");
-      iconTelefono.className = "icon-telefono";
-      iconTelefono.textContent = "✍️";
-
-      frontal.append(head, estado, timers, estadisticas, iconTelefono);
-
-      // Trasera
-      const trasera = document.createElement("div");
-      trasera.className = "trasera";
-      const backBtn = document.createElement("div");
-      backBtn.className = "regresar";
-      backBtn.textContent = "↩️";
-
+      // Sección de registro (dentro de la misma tarjeta, sin tapar login)
       const registro = document.createElement("div");
       registro.className = "registro";
+      registro.style.display = "none";
 
       const selectTipo = document.createElement("select");
       ["Entrante", "Saliente"].forEach(t=>{
@@ -571,19 +442,24 @@
       inputCantidad.value = "1";
       inputCantidad.placeholder = "Cantidad";
 
-      const botones = document.createElement("div");
-      botones.className = "botones";
-      const btnCheck = document.createElement("button");
-      btnCheck.className = "btn-check";
-      btnCheck.textContent = "✅";
+      const acciones = document.createElement("div");
+      acciones.className = "botones";
       const btnX = document.createElement("button");
       btnX.className = "btn-x";
-      btnX.textContent = "❌";
-      btnX.style.display = "none";
+      btnX.textContent = "Cancelar";
+      const btnCheck = document.createElement("button");
+      btnCheck.className = "btn-check";
+      btnCheck.textContent = "Guardar";
+      acciones.append(btnX, btnCheck);
 
-      botones.append(btnX, btnCheck);
-      registro.append(selectTipo, inputCantidad, botones);
-      trasera.append(backBtn, registro);
+      registro.append(selectTipo, inputCantidad, acciones);
+
+      // Front final
+      frontal.append(head, estado, timers, estadisticas, registro);
+
+      // Trasera (ya no se usa para llamadas; mantenemos mínima para consistencia)
+      const trasera = document.createElement("div");
+      trasera.className = "trasera";
 
       flip.append(frontal, trasera);
       card.appendChild(flip);
@@ -603,24 +479,24 @@
         btnCheck
       };
 
-      iconTelefono.onclick = e => {
+      // Abrir/cerrar formulario de registro sin tapar cabecera
+      btnRegistrar.onclick = (e)=> {
         e.stopPropagation();
-        frontal.classList.remove("active");
-        trasera.classList.add("active");
+        registro.style.display = (registro.style.display === "none") ? "block" : "none";
       };
-      backBtn.onclick = e => {
+      btnX.onclick = (e)=> {
         e.stopPropagation();
-        trasera.classList.remove("active");
-        frontal.classList.add("active");
+        registro.style.display = "none";
+      };
+      btnCheck.onclick = (e)=> {
+        e.stopPropagation();
+        registrarLlamada(nombre).then(()=> registro.style.display = "none");
       };
 
-      registro.addEventListener("click", e => e.stopPropagation());
-      btnCheck.onclick = ()=> registrarLlamada(nombre);
-
-      // Abrir menú radial
+      // Menú radial (cambiar estado)
       card.addEventListener("click",(e)=>{
-        e.stopPropagation();
-        if (trasera.classList.contains("active")) return;
+        // si está abierto el registro, no abrir menú
+        if (registro.style.display === "block") return;
 
         document.querySelectorAll(".tarjeta").forEach(t=> t.classList.remove("dimmed"));
         menuGlobal.classList.remove("active");
@@ -643,15 +519,13 @@
       tarjetaActiva = null;
     });
 
-    // Acciones de menú radial
+    // Acciones menú radial
     menuGlobal.querySelector(".btn-libre").onclick = ()=> accionMenu(tarjetaActiva, null);
     menuGlobal.querySelector(".btn-banio").onclick = ()=> accionMenu(tarjetaActiva, "baño");
     menuGlobal.querySelector(".btn-almuerzo").onclick = ()=> accionMenu(tarjetaActiva, "almuerzo");
 
     async function accionMenu(nombre, tipo){
       if (!nombre) return;
-
-      // Limite de 2 en baño (validación visual)
       if (tipo === "baño"){
         let enBanio = 0;
         nombres.forEach(n=>{
@@ -662,7 +536,6 @@
           return;
         }
       }
-
       await toggleEstado(nombre, tipo);
     }
 
@@ -692,14 +565,9 @@
     }
 
     /* =========================
-       Estado global + desfase
+       Estado global
     ========================== */
     onSnapshot(refBanio, (docSnap)=>{
-      if (docSnap.metadata.hasPendingWrites === false){
-        const t = docSnap.updateTime?.toMillis?.();
-        if (t) desfaseServidor = t - Date.now();
-      }
-
       const data = docSnap.data() || {};
       nombres.forEach(nombre=>{
         const info = data?.[nombre];
@@ -722,7 +590,7 @@
       });
     });
 
-    // Cronómetro en UI
+    // Cronómetro sincronizado por servidor
     setInterval(()=>{
       const ahora = getServerNow();
       nombres.forEach(nombre=>{
@@ -740,7 +608,6 @@
         tarjetas[nombre].tiempoBanio.textContent = `${minB}:${secB.toString().padStart(2,"0")}`;
         tarjetas[nombre].tiempoAlmuerzo.textContent = `${minA}:${secA.toString().padStart(2,"0")}`;
 
-        // Excedidos
         const est = tarjetas[nombre].estado;
         if (info.tipo === "baño" && tB > LIMITE.baño){
           est.className = "estado excedido";
@@ -754,7 +621,7 @@
     }, 1000);
 
     /* =========================
-       Llamadas
+       Llamadas (formulario en la tarjeta)
     ========================== */
     async function registrarLlamada(nombre){
       const ui = tarjetas[nombre];
@@ -782,8 +649,6 @@
         }
 
         ui.inputCantidad.value = 1;
-        ui.trasera.classList.remove("active");
-        ui.frontal.classList.add("active");
       }catch(e){
         console.error(e);
       }
@@ -800,10 +665,9 @@
 
       nombres.forEach(n=>{
         const stats = porAgente[n] || { entrantes:0, salientes:0 };
-        const el = tarjetas[n].estadisticas;
-        el.innerHTML = `
+        const chips = tarjetas[n].estadisticas.querySelector(".chips");
+        chips.innerHTML = `
           <span class="chip"><span class="i">📞⬅️</span> <span class="v">${stats.entrantes}</span></span>
-          <span>·</span>
           <span class="chip"><span class="i">📞➡️</span> <span class="v">${stats.salientes}</span></span>
         `;
       });
@@ -839,9 +703,8 @@
     });
 
     /* =========================
-       FAB (acciones) + teclado
+       FAB (Shift + :)
     ========================== */
-    const fab = document.getElementById("fab");
     const btnDashboard = document.getElementById("btnDashboard");
     const btnExcel = document.getElementById("btnExcel");
     const btnReset = document.getElementById("btnReset");
@@ -855,16 +718,13 @@
 
     document.addEventListener("keydown",(e)=>{
       if (e.shiftKey && e.key.toLowerCase() === ":"){
-        [btnDashboard, btnExcel, btnReset].forEach(b=>{
-          b.classList.toggle("show");
-        });
+        [btnDashboard, btnExcel, btnReset].forEach(b=> b.classList.toggle("show"));
       }
     });
 
     btnReset.onclick = async ()=>{
       if (!confirm("¿Seguro que deseas REINICIAR todo (tiempos y llamadas)?")) return;
 
-      // Reset local
       nombres.forEach(nombre=>{
         const t = tarjetas[nombre];
         t.info.tiempoBanio = 0;
@@ -877,14 +737,12 @@
         t.tiempoAlmuerzo.textContent = `0:00`;
       });
 
-      // Reset en Firestore
       const resetData = {};
       nombres.forEach(nombre=>{
         resetData[nombre] = { tipo: null, inicio: null, tiempoBanio: 0, tiempoAlmuerzo: 0 };
       });
       await setDoc(refBanio, resetData, { merge:true });
 
-      // Borrar llamadas
       const llamadasSnapshot = await getDocs(collection(db, "llamadas_test"));
       for (const d of llamadasSnapshot.docs){
         await deleteDoc(doc(db, "llamadas_test", d.id));
