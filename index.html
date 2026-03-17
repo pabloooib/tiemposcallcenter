@@ -3,7 +3,7 @@
 
 <head>
   <meta charset="UTF-8" />
- <tittle 
+  <title>EIS — Panel de Agentes (Sincronizado)</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <style>
     :root{
@@ -33,7 +33,7 @@
     }
     header.app{
       width:100%; max-width: 1400px; margin: 24px auto 12px auto; padding: 0 16px;
-      display:flex; align-items:center; gap:14px;
+      display:grid; grid-template-columns: 1fr auto auto; gap:14px; align-items:center;
     }
     .brand{ display:flex; align-items:center; gap:12px; }
     .brand .logo{
@@ -45,8 +45,20 @@
     .title h1{ margin:0; font-size:22px; font-weight:800; letter-spacing:.2px; }
     .title .subtitle{ color:var(--muted); font-size:12px; }
 
+    /* Buscador */
+    .search{
+      display:flex; align-items:center; gap:8px;
+      background: linear-gradient(145deg, rgba(255,255,255,.06), rgba(255,255,255,.03));
+      border:1px solid rgba(255,255,255,.08);
+      border-radius: 999px; padding:8px 12px; min-width: 260px;
+    }
+    .search input{
+      background: transparent; border:none; color: var(--text); outline:none;
+      font-size:14px; width: 100%;
+    }
+
     .info-bar{
-      margin-left:auto; display:flex; align-items:center; gap:12px;
+      display:flex; align-items:center; gap:12px;
       color:var(--muted); font-size:13px; padding:8px 12px; border-radius:999px;
       background: linear-gradient(145deg, rgba(255,255,255,.06), rgba(255,255,255,.03));
       border: 1px solid rgba(255,255,255,.07); box-shadow: var(--shadow);
@@ -71,7 +83,8 @@
       transition: transform .15s ease, box-shadow .2s ease, border-color .2s ease; isolation: isolate;
     }
     .tarjeta:hover{ transform: translateY(-2px); box-shadow: 0 14px 36px rgba(0,0,0,.55); border-color: rgba(99,102,241,.25); }
-    .flip{ position:relative; min-height: 170px; }
+    .tarjeta.dimmed{ filter: brightness(.88) saturate(.95); transform: scale(.99); }
+    .flip{ position:relative; min-height: 180px; }
     .frontal,.trasera{ position:absolute; inset:0; padding-top:4px; backface-visibility:hidden; transition: opacity .28s ease, transform .28s ease; width:100%; }
     .frontal{ opacity:0; transform: scale(.98); }
     .frontal.active{ opacity:1; transform: scale(1); position:relative; z-index:2; }
@@ -109,9 +122,18 @@
 
     .timers{ display:grid; grid-template-columns: 1fr 1fr; gap:10px; width:100%; }
     .timer{ background: linear-gradient(145deg, rgba(255,255,255,.06), rgba(255,255,255,.02)); border:1px solid rgba(255,255,255,.08);
-      border-radius: 10px; padding:8px 10px; display:flex; flex-direction:column; gap:4px; }
+      border-radius: 10px; padding:8px 10px; display:flex; flex-direction:column; gap:6px; }
     .t-label{ color: var(--muted); font-size:11px; font-weight:700; letter-spacing:.4px; text-transform:uppercase;}
     .t-value{ font-variant-numeric: tabular-nums; font-weight:800; color:#facc15; font-size:16px; }
+    .t-bar{
+      width:100%; height:6px; border-radius:6px; background: rgba(255,255,255,.08);
+      overflow: hidden;
+    }
+    .t-bar > .fill{
+      width:0%; height:100%; background: linear-gradient(90deg, #22c55e, #facc15); transition: width .4s ease;
+    }
+    .t-bar.baño > .fill{ background: linear-gradient(90deg, #22c55e, #ef4444); }
+    .t-bar.almuerzo > .fill{ background: linear-gradient(90deg, #60a5fa, #f59e0b); }
 
     .estadisticas{
       margin-top:8px; font-size:12.5px; font-weight:700; color:#cbd5e1; display:flex; align-items:center; justify-content:space-between; gap:8px;
@@ -121,7 +143,6 @@
     .estadisticas .chip{ display:flex; align-items:center; gap:6px; }
     .estadisticas .chip .i{ filter: drop-shadow(0 0 6px rgba(255,255,255,.15)); }
 
-    /* Botón dentro de la tarjeta para registrar llamadas */
     .btn-registrar{
       margin-left:auto; padding:6px 10px; border-radius:9px; border:1px solid rgba(255,255,255,.08);
       background: linear-gradient(145deg, rgba(255,255,255,.06), rgba(255,255,255,.03)); color:white; font-weight:700; font-size:12px; cursor:pointer;
@@ -144,8 +165,6 @@
     }
     .btn-check{ background: linear-gradient(145deg, rgba(34,197,94,.22), rgba(34,197,94,.08)); }
     .btn-x{ background: linear-gradient(145deg, rgba(239,68,68,.22), rgba(239,68,68,.08)); display:none; }
-
-    .tarjeta.dimmed{ filter: brightness(.88) saturate(.95); transform: scale(.99); }
 
     /* Menú radial */
     .menu-radial{
@@ -178,6 +197,19 @@
     .fab button.show{ opacity:1; pointer-events:auto; }
     .fab button:hover{ transform: translateY(-1px); box-shadow: 0 14px 34px rgba(0,0,0,.55); }
 
+    /* Toasts */
+    .toast-container{
+      position: fixed; bottom: 18px; right: 18px; display:flex; flex-direction:column; gap:10px; z-index:4000;
+    }
+    .toast{
+      background: linear-gradient(145deg, rgba(255,255,255,.06), rgba(255,255,255,.03));
+      border:1px solid rgba(255,255,255,.08); color:#e2e8f0; padding:10px 12px; border-radius:10px;
+      box-shadow: var(--shadow); font-size:13px; font-weight:700; letter-spacing:.2px; opacity:0; transform: translateY(6px);
+      animation: toast-in .2s ease forwards;
+    }
+    @keyframes toast-in { to { opacity:1; transform: translateY(0); } }
+    @keyframes toast-out { to { opacity:0; transform: translateY(6px); } }
+
     .alerta-banio{
       position: fixed; top: 10%; left: 50%; transform: translate(-50%, -50%) scale(.9);
       background: linear-gradient(165deg,#0b1220,#0d1320); color:white; padding: 26px 32px; border-radius:16px; font-size:18px; font-weight:800;
@@ -194,9 +226,18 @@
     <div class="brand">
       <div class="logo">📞</div>
       <div class="title">
-                                <h1>            PANEL DE AGENTES         </h1>
+        <h1>EIS — Panel de Agentes</h1>
+        <div class="subtitle">Estados y llamadas sincronizados a hora de servidor</div>
       </div>
     </div>
+
+    <!-- Buscador de agentes -->
+    <div class="search">
+      🔎
+      <input id="searchInput" type="text" placeholder="Buscar agente..." autocomplete="off" />
+    </div>
+
+    <!-- Reloj de servidor -->
     <div class="info-bar">
       <span class="dot"></span>
       <span id="serverClock">Sincronizando…</span>
@@ -220,6 +261,9 @@
     <button id="btnReset">⟳ Reset</button>
   </div>
 
+  <!-- Toasts -->
+  <div id="toastContainer" class="toast-container"></div>
+
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-app.js";
     import {
@@ -242,6 +286,21 @@
     };
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
+
+    /* =========================
+       Utilidades UI
+    ========================== */
+    const toastContainer = document.getElementById("toastContainer");
+    function showToast(msg){
+      const t = document.createElement("div");
+      t.className = "toast";
+      t.textContent = msg;
+      toastContainer.appendChild(t);
+      setTimeout(()=>{
+        t.style.animation = "toast-out .2s ease forwards";
+        setTimeout(()=> t.remove(), 250);
+      }, 1400);
+    }
 
     /* =========================
        Sincronización de hora REAL
@@ -395,11 +454,19 @@
 
       const timerB = document.createElement("div");
       timerB.className = "timer";
-      timerB.innerHTML = `<div class="t-label">Baño</div><div class="t-value"><span class="cronometro">0:00</span></div>`;
+      timerB.innerHTML = `
+        <div class="t-label">Baño</div>
+        <div class="t-value"><span class="cronometro">0:00</span></div>
+        <div class="t-bar baño"><div class="fill"></div></div>
+      `;
 
       const timerA = document.createElement("div");
       timerA.className = "timer";
-      timerA.innerHTML = `<div class="t-label">Almuerzo</div><div class="t-value"><span class="cronometro">0:00</span></div>`;
+      timerA.innerHTML = `
+        <div class="t-label">Almuerzo</div>
+        <div class="t-value"><span class="cronometro">0:00</span></div>
+        <div class="t-bar almuerzo"><div class="fill"></div></div>
+      `;
 
       timers.append(timerB, timerA);
 
@@ -457,9 +524,12 @@
       contenedor.appendChild(card);
 
       tarjetas[nombre] = {
+        card,
         estado,
         tiempoBanio: timerB.querySelector(".cronometro"),
         tiempoAlmuerzo: timerA.querySelector(".cronometro"),
+        barBanio: timerB.querySelector(".t-bar.baño .fill"),
+        barAlmuerzo: timerA.querySelector(".t-bar.almuerzo .fill"),
         loginSpan,
         info: {},
         estadisticas,
@@ -517,19 +587,24 @@
       return menuGlobal.dataset.agent || tarjetaActiva || null;
     }
 
-    // Botones del menú radial
-    menuGlobal.querySelector(".btn-libre").onclick    = () => accionMenu(getAgenteActivo(), null);
-    menuGlobal.querySelector(".btn-banio").onclick    = () => accionMenu(getAgenteActivo(), "baño");
-    menuGlobal.querySelector(".btn-almuerzo").onclick = () => accionMenu(getAgenteActivo(), "almuerzo");
-
-    // Cerrar menú al hacer click fuera
-    document.addEventListener("click", () => {
+    // Helper: cerrar menú radial (requerido)
+    function cerrarMenuRadial() {
       menuGlobal.classList.remove("active");
       menuGlobal.setAttribute("aria-hidden", "true");
       document.querySelectorAll(".tarjeta").forEach(t => t.classList.remove("dimmed"));
       tarjetaActiva = null;
       delete menuGlobal.dataset.agent;
-    });
+    }
+
+    // Botones del menú radial (autocierre)
+    menuGlobal.querySelector(".btn-libre").onclick    = async () => { await accionMenu(getAgenteActivo(), null); cerrarMenuRadial(); };
+    menuGlobal.querySelector(".btn-banio").onclick    = async () => { await accionMenu(getAgenteActivo(), "baño"); cerrarMenuRadial(); };
+    menuGlobal.querySelector(".btn-almuerzo").onclick = async () => { await accionMenu(getAgenteActivo(), "almuerzo"); cerrarMenuRadial(); };
+
+    // Cerrar menú al hacer click fuera
+    document.addEventListener("click", () => { cerrarMenuRadial(); });
+    // Cerrar con ESC
+    document.addEventListener("keydown", (e)=> { if (e.key === "Escape") cerrarMenuRadial(); });
 
     async function accionMenu(nombre, tipo){
       if (!nombre) return;
@@ -540,6 +615,7 @@
         });
         if (enBanio >= 2){
           mostrarAlertaBanio();
+          showToast("⏳ Máximo de 2 en baño. Intenta más tarde.");
           return;
         }
       }
@@ -570,15 +646,7 @@
         }
       }, { merge: true });
 
-      // feedback visual rápido
-      try {
-        const el = tarjetas[nombre]?.estado;
-        if (el) {
-          el.style.transition = "box-shadow .2s ease";
-          el.style.boxShadow = "0 0 0 3px rgba(96,165,250,.35)";
-          setTimeout(() => el.style.boxShadow = "", 300);
-        }
-      } catch {}
+      showToast(nuevoTipo ? `✅ ${nombre} marcado: ${nuevoTipo}` : `✅ ${nombre} marcado: Libre`);
     }
 
     /* =========================
@@ -607,7 +675,7 @@
       });
     });
 
-    // Cronómetro sincronizado por servidor
+    // Cronómetro sincronizado por servidor + barras de progreso
     setInterval(()=>{
       const ahora = getServerNow();
       nombres.forEach(nombre=>{
@@ -620,11 +688,19 @@
         if (info.tipo === "baño" && ini) tB += Math.max(0, Math.floor((ahora - ini)/1000));
         if (info.tipo === "almuerzo" && ini) tA += Math.max(0, Math.floor((ahora - ini)/1000));
 
+        // Tiempos UI
         const minB = Math.floor(tB/60), secB = tB % 60;
         const minA = Math.floor(tA/60), secA = tA % 60;
         tarjetas[nombre].tiempoBanio.textContent = `${minB}:${secB.toString().padStart(2,"0")}`;
         tarjetas[nombre].tiempoAlmuerzo.textContent = `${minA}:${secA.toString().padStart(2,"0")}`;
 
+        // Barras de progreso (solo activas cuando está en ese estado)
+        const percentB = Math.min(100, Math.round((tB / LIMITE.baño) * 100));
+        const percentA = Math.min(100, Math.round((tA / LIMITE.almuerzo) * 100));
+        tarjetas[nombre].barBanio.style.width = (info.tipo === "baño") ? `${percentB}%` : "0%";
+        tarjetas[nombre].barAlmuerzo.style.width = (info.tipo === "almuerzo") ? `${percentA}%` : "0%";
+
+        // Excedidos
         const est = tarjetas[nombre].estado;
         if (info.tipo === "baño" && tB > LIMITE.baño){
           est.className = "estado excedido";
@@ -666,6 +742,7 @@
         }
 
         ui.inputCantidad.value = 1;
+        showToast(`💾 Llamadas registradas para ${nombre}`);
       }catch(e){
         console.error(e);
       }
@@ -726,7 +803,6 @@
     const btnReset = document.getElementById("btnReset");
 
     document.addEventListener("keydown",(e)=>{
-      // Mostrar/ocultar botones ocultos con Shift + q
       if (e.shiftKey && e.key.toLowerCase() === "q"){
         [btnExcel, btnReset].forEach(b=> b.classList.toggle("show"));
       }
@@ -746,6 +822,8 @@
         t.estado.innerHTML = `<span class="dot-sm"></span> Libre`;
         t.tiempoBanio.textContent = `0:00`;
         t.tiempoAlmuerzo.textContent = `0:00`;
+        t.barBanio.style.width = "0%";
+        t.barAlmuerzo.style.width = "0%";
       });
 
       // Reset en Firestore
@@ -761,7 +839,7 @@
         await deleteDoc(doc(db, "llamadas_test", d.id));
       }
 
-      alert("Todo se ha reiniciado correctamente ✅");
+      showToast("🔁 Todo se ha reiniciado correctamente");
     };
 
     btnExcel.onclick = async ()=>{
@@ -771,14 +849,31 @@
         const fecha = it.timestamp?.toDate ? it.timestamp.toDate().toLocaleString("es-GT", { timeZone: "America/Guatemala" }) : "";
         return { Agente: it.agente || "", Tipo: it.tipo || "", Cantidad: it.cantidad || 0, Fecha: fecha };
       });
-      if (!data.length) return alert("No hay llamadas registradas.");
+      if (!data.length){ showToast("ℹ️ No hay llamadas registradas."); return; }
 
       const ws = XLSX.utils.json_to_sheet(data);
       const wb = XLSX.utils.book_new();
       XLSX.utils.book_append_sheet(wb, ws, "Llamadas");
       const fechaNombre = new Date(getServerNow()).toLocaleDateString("es-GT").replace(/\//g,"-");
       XLSX.writeFile(wb, `llamadas_${fechaNombre}.xlsx`);
+      showToast("⬇️ Archivo Excel exportado");
     };
+
+    /* =========================
+       Buscador (filtrado en tiempo real)
+    ========================== */
+    const searchInput = document.getElementById("searchInput");
+    let searchTimer = null;
+    searchInput.addEventListener("input", ()=>{
+      clearTimeout(searchTimer);
+      searchTimer = setTimeout(()=>{
+        const q = searchInput.value.trim().toLowerCase();
+        nombres.forEach(nombre=>{
+          const match = nombre.toLowerCase().includes(q);
+          tarjetas[nombre].card.style.display = match ? "" : "none";
+        });
+      }, 120);
+    });
   </script>
 
   <div id="alertaBanio" class="alerta-banio">
