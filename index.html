@@ -121,7 +121,7 @@
     .estadisticas .chip{ display:flex; align-items:center; gap:6px; }
     .estadisticas .chip .i{ filter: drop-shadow(0 0 6px rgba(255,255,255,.15)); }
 
-    /* Botón dentro de la tarjeta para registrar llamadas (no obstruye el login) */
+    /* Botón dentro de la tarjeta para registrar llamadas */
     .btn-registrar{
       margin-left:auto; padding:6px 10px; border-radius:9px; border:1px solid rgba(255,255,255,.08);
       background: linear-gradient(145deg, rgba(255,255,255,.06), rgba(255,255,255,.03)); color:white; font-weight:700; font-size:12px; cursor:pointer;
@@ -167,14 +167,15 @@
     .btn-banio{ background: linear-gradient(145deg, rgba(245,158,11,.3), rgba(245,158,11,.12)); top:10px; left:-70px; font-size:18px; color:#111827; font-weight:900;}
     .btn-almuerzo{ background: linear-gradient(145deg, rgba(99,102,241,.3), rgba(99,102,241,.12)); top:10px; left:50px;}
 
+    /* Botones ocultos (Shift+q) */
     .fab{ position: fixed; top: 14px; right: 14px; display:flex; gap:10px; z-index: 3000; }
     .fab button{
       padding:10px 12px; border-radius:12px; border:1px solid rgba(255,255,255,.08);
       background: linear-gradient(145deg, rgba(255,255,255,.08), rgba(255,255,255,.03));
       color:white; font-weight:700; letter-spacing:.2px; box-shadow: var(--shadow); cursor:pointer;
-      transition: transform .12s ease, box-shadow .15s ease, opacity .2s ease; opacity:0;
+      transition: transform .12s ease, box-shadow .15s ease, opacity .2s ease; opacity:0; pointer-events:none;
     }
-    .fab button.show{ opacity:1; }
+    .fab button.show{ opacity:1; pointer-events:auto; }
     .fab button:hover{ transform: translateY(-1px); box-shadow: 0 14px 34px rgba(0,0,0,.55); }
 
     .alerta-banio{
@@ -214,9 +215,8 @@
     <button class="btn-almuerzo" title="Marcar Almuerzo">🍔</button>
   </div>
 
-  <!-- Botones flotantes (Shift + :) -->
+  <!-- Botones ocultos (Shift + q) -->
   <div class="fab" id="fab">
-    <button id="btnDashboard">📊 Encuestas</button>
     <button id="btnExcel">⬇️ Exportar</button>
     <button id="btnReset">⟳ Reset</button>
   </div>
@@ -449,7 +449,7 @@
       // Front final
       frontal.append(head, estado, timers, estadisticas, registro);
 
-      // Trasera (mantenida vacía para estructura)
+      // Trasera (mantenida vacía)
       const trasera = document.createElement("div");
       trasera.className = "trasera";
 
@@ -500,7 +500,7 @@
 
         card.classList.add("dimmed");
         tarjetaActiva = nombre;
-        menuGlobal.dataset.agent = nombre; // <-- guardar agente activo también aquí
+        menuGlobal.dataset.agent = nombre; // guardar agente activo
 
         menuGlobal.classList.add("active");
         menuGlobal.setAttribute("aria-hidden","false");
@@ -721,28 +721,22 @@
     });
 
     /* =========================
-       FAB (Shift + :)
+       Botones ocultos (Shift + q)
     ========================== */
-    const btnDashboard = document.getElementById("btnDashboard");
     const btnExcel = document.getElementById("btnExcel");
     const btnReset = document.getElementById("btnReset");
 
-    btnDashboard.onclick = ()=>{
-      window.open(
-        "https://firebasestorage.googleapis.com/v0/b/workplace-18675.firebasestorage.app/o/Dashboard%20Encuestas.html?alt=media&token=78d463d1-3957-4d2b-9fdb-e7f435babaff",
-        "_blank"
-      );
-    };
-
     document.addEventListener("keydown",(e)=>{
-      if (e.shiftKey && e.key.toLowerCase() === ":"){
-        [btnDashboard, btnExcel, btnReset].forEach(b=> b.classList.toggle("show"));
+      // Mostrar/ocultar botones ocultos con Shift + q
+      if (e.shiftKey && e.key.toLowerCase() === "q"){
+        [btnExcel, btnReset].forEach(b=> b.classList.toggle("show"));
       }
     });
 
     btnReset.onclick = async ()=>{
       if (!confirm("¿Seguro que deseas REINICIAR todo (tiempos y llamadas)?")) return;
 
+      // Reset local visual
       nombres.forEach(nombre=>{
         const t = tarjetas[nombre];
         t.info.tiempoBanio = 0;
@@ -755,12 +749,14 @@
         t.tiempoAlmuerzo.textContent = `0:00`;
       });
 
+      // Reset en Firestore
       const resetData = {};
       nombres.forEach(nombre=>{
         resetData[nombre] = { tipo: null, inicio: null, tiempoBanio: 0, tiempoAlmuerzo: 0 };
       });
       await setDoc(refBanio, resetData, { merge:true });
 
+      // Borrar llamadas
       const llamadasSnapshot = await getDocs(collection(db, "llamadas_test"));
       for (const d of llamadasSnapshot.docs){
         await deleteDoc(doc(db, "llamadas_test", d.id));
