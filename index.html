@@ -1,571 +1,917 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
   <meta charset="UTF-8" />
-  <title>EIS</title>
+  <title>EIS — Panel de Agentes</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <link rel="icon" href="https://cdn-icons-png.flaticon.com/128/1302/1302539.png" type="image/png">
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
-
   <style>
-    /* ====== TOTAL BLACK THEME ====== */
     :root{
-      --bg:#000000;               /* negro puro */
-      --card:#0e0e0e;             /* tarjeta */
-      --card-br:#1a1a1a;          /* borde sutil */
-      --text:#f5f5f5;             /* texto principal */
-      --text-soft:#cfcfcf;        /* texto secundario */
-
-      --chip-free-bg:#0f2617;     /* verdes muy oscuros */
-      --chip-free:#22c55e;
-      --chip-busy-bg:#2a260b;     /* dorados oscuros */
+      --bg: #0b1220;
+      --bg-2: #0f172a;
+      --card: #111827;
+      --card-2:#0f1828;
+      --text: #e5e7eb;
+      --muted:#94a3b8;
+      --accent:#60a5fa;
+      --success:#22c55e;
+      --warn:#f59e0b;
+      --danger:#ef4444;
+      --chip-free:#16a34a;
       --chip-busy:#facc15;
-      --chip-over-bg:#2a0d0d;     /* rojos oscuros */
       --chip-over:#ef4444;
-
-      --ring: rgba(255,255,255,0.12);
-      --shadow: 0 8px 24px rgba(0,0,0,0.7);
-      --radius:14px;
-
-      --active-br: #ffffff55;
-      --active-glow: 0 0 0 2px #ffffff22, 0 0 24px #ffffff18;
+      --ring:#3b82f6;
+      --glass: rgba(255,255,255,.06);
+      --shadow: 0 10px 30px rgba(0,0,0,.45);
+      --radius: 14px;
     }
 
-    *{box-sizing:border-box}
-    html,body{height:100%}
-    body{
+    /* ===== Base ===== */
+    *{ box-sizing: border-box; }
+    html,body{
+      height:100%;
       margin:0;
-      font-family: 'Inter', system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
-      color:var(--text);
-      background:
-        radial-gradient(80% 120% at 20% 10%, #0a0a0a 0%, transparent 60%),
-        radial-gradient(80% 120% at 80% 90%, #0a0a0a 0%, transparent 60%),
-        var(--bg);
-      display:flex;
-      flex-direction:column;
-      gap:14px;
-      padding:20px 16px 28px;
+      background: radial-gradient(1200px 600px at 15% 0%, #0b182e 0%, var(--bg) 40%, #050914 100%);
+      color: var(--text);
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial, "Noto Sans", "Apple Color Emoji","Segoe UI Emoji";
     }
 
-    header{
+    header.app{
       width:100%;
-      max-width:1500px;
-      margin:0 auto 4px;
+      max-width: 1400px;
+      margin: 24px auto 12px auto;
+      padding: 0 16px;
+      display:flex;
+      align-items: center;
+      gap:14px;
+    }
+    .brand{
       display:flex;
       align-items:center;
-      justify-content:center;
-    }
-    h1{
-      margin:0;
-      font-size: clamp(18px, 2.6vw, 28px);
-      font-weight:700;
-      letter-spacing:.5px;
-      color:#fff;
-      opacity:.92;
-    }
-
-    /* GRID */
-    .contenedor{
-      width:100%;
-      max-width:1500px;
-      margin:0 auto;
-      display:grid;
-      grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-      gap:14px;
-      align-items:start;
-    }
-
-    /* MODO COMPACTO */
-    body.compacto .contenedor{
-      grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
       gap:12px;
     }
-    body.compacto .tarjeta{ padding:12px 10px; }
-    body.compacto .avatar{ width:50px; height:50px; }
-    body.compacto .nombre{ font-size:15px; }
-    body.compacto .estado{ font-size:11px; padding:5px 10px; }
-    body.compacto .tiempo{ font-size:12px; }
+    .brand .logo{
+      width:38px;height:38px;border-radius:10px;
+      display:grid;place-items:center;
+      background: linear-gradient(145deg,#1f3b77,#133061);
+      box-shadow: inset 0 0 0 1px rgba(255,255,255,.06), var(--shadow);
+    }
+    .title{
+      display:flex;flex-direction:column;line-height:1.1;
+    }
+    .title h1{
+      margin:0;font-size:22px;font-weight:800; letter-spacing:.2px;
+    }
+    .title .subtitle{
+      color:var(--muted); font-size:12px;
+    }
 
-    /* CARD */
+    /* Info bar (hora servidor) */
+    .info-bar{
+      margin-left:auto;
+      display:flex;align-items:center;gap:12px;
+      color:var(--muted); font-size:13px;
+      padding:8px 12px;
+      border-radius:999px;
+      background: linear-gradient(145deg, rgba(255,255,255,.06), rgba(255,255,255,.03));
+      border: 1px solid rgba(255,255,255,.07);
+      box-shadow: var(--shadow);
+    }
+    .dot{
+      width:8px;height:8px;border-radius:50%;background: var(--success);
+      box-shadow: 0 0 10px var(--success);
+    }
+    .sep{
+      width:1px;height:14px;background: rgba(255,255,255,.12);
+    }
+
+    /* ===== Grid ===== */
+    .contenedor{
+      width:100%;
+      max-width:1400px;
+      margin: 8px auto 80px auto;
+      padding: 0 16px;
+      display:grid;
+      grid-template-columns: repeat(7, minmax(160px,1fr));
+      gap:14px;
+    }
+    @media (max-width: 1280px){
+      .contenedor{ grid-template-columns: repeat(5, minmax(180px,1fr));}
+    }
+    @media (max-width: 1024px){
+      .contenedor{ grid-template-columns: repeat(4, minmax(180px,1fr));}
+    }
+    @media (max-width: 860px){
+      .contenedor{ grid-template-columns: repeat(3, minmax(190px,1fr));}
+    }
+    @media (max-width: 640px){
+      .contenedor{ grid-template-columns: repeat(2, minmax(200px,1fr));}
+    }
+    @media (max-width: 460px){
+      .contenedor{ grid-template-columns: 1fr;}
+    }
+
+    /* ===== Card ===== */
     .tarjeta{
       position:relative;
-      background: linear-gradient(180deg, var(--card), #0a0a0a);
-      border:1px solid var(--card-br);
-      border-radius:var(--radius);
-      padding:16px 12px 14px;
-      text-align:center;
+      background: linear-gradient(175deg, var(--card), var(--card-2));
+      border-radius: var(--radius);
+      padding: 16px 12px 14px 12px;
       box-shadow: var(--shadow);
-      cursor:pointer;
-      overflow:hidden;
-      transition: transform .18s ease, box-shadow .22s ease, border-color .2s ease, background .2s ease;
+      border: 1px solid rgba(255,255,255,.06);
+      overflow: hidden;
+      cursor: pointer;
+      transition: transform .15s ease, box-shadow .2s ease, border-color .2s ease;
+      isolation: isolate;
     }
-    .tarjeta:hover{ transform: translateY(-2px); box-shadow: 0 12px 30px rgba(0,0,0,0.75); }
-    .tarjeta.dimmed{ filter:brightness(.55); transform:scale(.985); }
-
-    /* Tarjeta activa (seleccionada) */
-    .tarjeta.activa{
-      border-color: var(--active-br);
-      box-shadow: var(--active-glow), var(--shadow);
+    .tarjeta::before{
+      content:"";
+      position:absolute; inset: -2px;
+      background: radial-gradient(400px 120px at 20% -20%, rgba(99,102,241,.18), transparent 40%),
+                  radial-gradient(320px 140px at 120% -30%, rgba(56,189,248,.22), transparent 38%);
+      z-index:0; opacity:.6; pointer-events:none;
     }
+    .tarjeta:hover{
+      transform: translateY(-2px);
+      box-shadow: 0 14px 36px rgba(0,0,0,.55);
+      border-color: rgba(99,102,241,.25);
+    }
+    .flip{ position:relative; min-height: 156px; }
+    .frontal,.trasera{
+      position:absolute; inset:0; padding-top:4px;
+      backface-visibility: hidden;
+      transition: opacity .28s ease, transform .28s ease;
+      width:100%;
+    }
+    .frontal{ opacity:0; transform: scale(.98);}
+    .frontal.active{ opacity:1; transform: scale(1); position:relative; z-index:2;}
+    .trasera{ opacity:0; transform: scale(.98);}
+    .trasera.active{ opacity:1; transform: scale(1); position:relative; z-index:2;}
 
+    /* Header dentro de card */
+    .card-head{
+      display:flex; align-items:center; gap:8px; margin-bottom:8px;
+    }
     .avatar{
-      width:60px; height:60px; border-radius:50%;
-      margin:2px auto 8px; display:grid; place-items:center;
-      color:#fff; font-weight:700; font-size:20px;
-      background: radial-gradient(120px 120px at 30% 30%, #1b1b1b, #101010 55%, #050505);
-      border:1px solid #222;
-      box-shadow: inset 0 0 0 1px rgba(255,255,255,0.03);
-      overflow:hidden;
+      width:34px;height:34px;border-radius:10px; display:grid;place-items:center;
+      background: linear-gradient(145deg, #1e293b, #0b1220);
+      color:#93c5fd; font-weight:800; font-size:13px;
+      border:1px solid rgba(255,255,255,.06);
+      box-shadow: inset 0 0 0 1px rgba(255,255,255,.03);
       user-select:none;
     }
-    .avatar.foto{
-      background-size: cover;
-      background-position: center;
-      text-indent: -9999px;
-    }
-
     .nombre{
-      font-size:16px; font-weight:700; color:var(--text); margin-bottom:6px;
-      user-select:none;
+      font-size:15px;font-weight:700; letter-spacing:.2px;
+      text-align:left; flex:1; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
+    }
+    .login-superior{
+      font-size:11px; font-weight:700;
+      padding:4px 8px; border-radius:999px;
+      border:1px solid rgba(255,255,255,.08);
+      background: linear-gradient(145deg, rgba(34,197,94,.15), rgba(34,197,94,.08));
+      color:#86efac;
+    }
+    .login-tarde{
+      background: linear-gradient(145deg, rgba(239,68,68,.18), rgba(239,68,68,.08));
+      color:#fecaca;
+    }
+    .login-puntual{
+      background: linear-gradient(145deg, rgba(34,197,94,.18), rgba(34,197,94,.08));
+      color:#bbf7d0;
     }
 
     .estado{
       display:inline-flex; align-items:center; gap:8px;
-      font-size:12px; font-weight:800;
-      padding:6px 12px; border-radius:999px;
-      margin-bottom:10px; border:1px solid transparent;
-      transition: background .25s ease, color .25s ease, border-color .25s ease, transform .12s ease;
-      user-select:none;
+      font-size:12px; font-weight:800; letter-spacing:.3px;
+      margin: 6px 0 8px 0;
+      padding: 6px 10px; border-radius: 10px;
+      border:1px solid rgba(255,255,255,.08);
+      background: linear-gradient(145deg, rgba(255,255,255,.06), rgba(255,255,255,.03));
+      color: #e2e8f0;
     }
-    .estado.libre{ background:var(--chip-free-bg); color:var(--chip-free); border-color:#1f3e2b; }
-    .estado.ocupado{ background:var(--chip-busy-bg); color:var(--chip-busy); border-color:#4a3e12; animation: sutil 1.5s ease-in-out infinite; }
-    .estado.excedido{ background:var(--chip-over-bg); color:var(--chip-over); border-color:#4a1212; animation: sutil 1.2s ease-in-out infinite; }
-    @keyframes sutil{0%,100%{transform:scale(1)}50%{transform:scale(1.05)}}
-
-    .tiempo{ font-size:13px; margin:3px 0; color:var(--text) }
-    .cronometro{ color:#f0c62b; font-weight:800; }
-
-    /* flash cuando cambia de estado */
-    .tarjeta.flash{
-      box-shadow: 0 0 0 0 var(--ring), var(--shadow);
-      animation: ring .8s ease-out;
+    .estado .dot-sm{
+      width:10px;height:10px;border-radius:50%;
+      box-shadow: 0 0 10px currentColor;
     }
-    @keyframes ring{
-      0%{ box-shadow: 0 0 0 0 var(--ring), var(--shadow); }
-      100%{ box-shadow: 0 0 0 18px rgba(255,255,255,0), var(--shadow); }
+    .estado.libre{ color:#86efac; }
+    .estado.libre .dot-sm{ background: var(--chip-free);}
+    .estado.ocupado{ color:#fef08a; animation: pulse 1.2s infinite; }
+    .estado.ocupado .dot-sm{ background: var(--chip-busy); }
+    .estado.excedido{ color:#fecaca; animation: pulse 1.2s infinite; }
+    .estado.excedido .dot-sm{ background: var(--chip-over); }
+
+    @keyframes pulse{
+      0%{ transform: translateZ(0) scale(1); }
+      50%{ transform: translateZ(0) scale(1.04); }
+      100%{ transform: translateZ(0) scale(1); }
     }
 
-    /* flip */
-    .flip{ position:relative; width:100%; }
-    .frontal, .trasera{
-      backface-visibility:hidden;
-      transition: opacity .26s ease, transform .26s ease;
+    .timers{
+      display:grid; grid-template-columns: 1fr 1fr; gap:10px;
       width:100%;
     }
-    .frontal.active, .trasera.active{ opacity:1; position:relative; z-index:2; transform: translateY(0); }
-    .frontal{ opacity:0; position:absolute; inset:0; transform: translateY(6px); }
-    .trasera{ opacity:0; position:absolute; inset:0; transform: translateY(6px); }
-
-    /* iconos */
-    .icon-telefono, .regresar{
-      position:absolute; top:8px; right:10px;
-      font-size:20px; cursor:pointer; opacity:.9;
-      transition: transform .15s ease, opacity .15s ease;
-      user-select:none; color:#eaeaea;
+    .timer{
+      background: linear-gradient(145deg, rgba(255,255,255,.06), rgba(255,255,255,.02));
+      border:1px solid rgba(255,255,255,.08);
+      border-radius: 10px; padding:8px 10px;
+      display:flex; flex-direction:column; gap:4px;
     }
-    .icon-telefono:hover, .regresar:hover{ transform:scale(1.12); opacity:1; }
+    .t-label{ color: var(--muted); font-size:11px; font-weight:700; letter-spacing:.4px; text-transform:uppercase;}
+    .t-value{ font-variant-numeric: tabular-nums; font-weight:800; color:#facc15; font-size:16px; }
 
-    /* formulario trasera (se deja por si lo usas a futuro) */
-    .registro{ display:flex; flex-direction:column; gap:8px; margin-top:8px; }
-    .registro input, .registro select{
-      background:#0b0b0b; border:1px solid #1a1a1a; color:#eee;
-      height:32px; border-radius:10px; padding:0 10px; outline:none; font-size:14px;
+    .estadisticas{
+      margin-top:8px; font-size:12.5px; font-weight:700; color:#cbd5e1;
+      display:flex; align-items:center; justify-content:center; gap:8px;
+      padding:6px 8px; border-radius:10px;
+      background: linear-gradient(145deg, rgba(148,163,184,.15), rgba(148,163,184,.06));
+      border:1px solid rgba(255,255,255,.06);
     }
-    .botones{ display:flex; justify-content:center; gap:10px; }
+    .estadisticas .chip{ display:flex; align-items:center; gap:6px; }
+    .estadisticas .chip .i{ filter: drop-shadow(0 0 6px rgba(255,255,255,.15)); }
+
+    .icon-telefono{
+      position:absolute; top:10px; right:10px; z-index:3;
+      font-size:18px; cursor:pointer; user-select:none;
+      opacity:.85; transition: transform .15s ease, opacity .2s ease;
+    }
+    .icon-telefono:hover{ transform: scale(1.1); opacity:1; }
+
+    .regresar{
+      position:absolute; top:10px; right:10px; z-index:3;
+      font-size:20px; cursor:pointer; user-select:none;
+      opacity:.9; transition: transform .15s ease;
+    }
+    .regresar:hover{ transform: scale(1.1); }
+
+    .registro{
+      display:flex; flex-direction:column; gap:8px;
+      margin-top: 8px; width:100%;
+      padding:8px; background: rgba(255,255,255,.03); border-radius:10px;
+      border:1px solid rgba(255,255,255,.06);
+    }
+    .registro select,.registro input{
+      width:100%; height:36px; border-radius:9px; border:1px solid rgba(255,255,255,.08);
+      background: rgba(15,23,42,.6); color: var(--text);
+      padding: 6px 10px; font-size:14px; outline: none;
+      transition: border-color .15s ease, box-shadow .15s ease;
+    }
+    .registro select:focus, .registro input:focus{
+      border-color: rgba(99,102,241,.35);
+      box-shadow: 0 0 0 3px rgba(99,102,241,.15);
+    }
+    .botones{
+      display:flex; justify-content: center; gap:12px; margin-top:4px;
+    }
     .botones button{
-      width:40px; height:40px; border-radius:10px; border:1px solid #1a1a1a; color:#fff;
-      background:#121212; cursor:pointer; transition: transform .12s ease, box-shadow .18s ease;
+      width:40px; height:40px; border-radius:12px; border:1px solid rgba(255,255,255,.08);
+      background: linear-gradient(145deg, rgba(255,255,255,.06), rgba(255,255,255,.03));
+      color:white; font-size:18px; cursor:pointer;
+      transition: transform .12s ease, box-shadow .15s ease, background .2s ease;
+      box-shadow: var(--shadow);
     }
-    .botones button:hover{ transform: translateY(-1px); }
-    .btn-check{ background:#16401f; border-color:#2b5c38; }
-    .btn-x{ background:#3a1515; border-color:#5a2020; }
+    .botones button:hover{ transform: translateY(-1px); box-shadow: 0 12px 28px rgba(0,0,0,.5);}
+    .btn-check{ background: linear-gradient(145deg, rgba(34,197,94,.22), rgba(34,197,94,.08)); }
+    .btn-x{ background: linear-gradient(145deg, rgba(239,68,68,.22), rgba(239,68,68,.08)); }
 
-    .estadisticas{ margin-top:8px; font-size:12px; color:var(--text-soft); }
+    .tarjeta.dimmed{ filter: brightness(.88) saturate(.95); transform: scale(.99); }
 
-    /* MENÚ RADIAL */
+    /* ===== Menú radial ===== */
     .menu-radial{
-      position:fixed; transform:translate(-50%, -50%) scale(0.65);
-      transition: transform .22s ease, opacity .18s ease;
-      pointer-events:none; z-index:3000; opacity:0;
+      position: fixed;
+      transform: translate(-50%, -50%) scale(.92);
+      transition: transform .22s ease, opacity .2s ease;
+      pointer-events: none; z-index: 2000; opacity:0;
     }
-    .menu-radial.active{ transform:translate(-50%, -50%) scale(1); pointer-events:auto; opacity:1; }
-    .ring-base{
-      position:absolute; inset:-6px; border-radius:999px;
-      background: radial-gradient(120px 120px at 50% 50%, rgba(255,255,255,0.08), transparent 60%);
-      filter: blur(10px); opacity:.8; pointer-events:none;
+    .menu-radial.active{
+      transform: translate(-50%, -50%) scale(1);
+      pointer-events: auto; opacity:1;
+    }
+    .menu-radial::before{
+      content:"";
+      position: absolute; inset:-22px;
+      background: radial-gradient(220px 220px at 50% 50%, rgba(37,99,235,.14), transparent 60%);
+      filter: blur(8px); z-index:-1;
     }
     .menu-radial button{
-      position:absolute; width:60px; height:60px; border-radius:14px;
-      border:1px solid #1d1d1d; background:#0d0d0d; color:#f0f0f0;
-      font-weight:800; font-size:20px; cursor:pointer; box-shadow: var(--shadow);
-      transition: transform .14s ease, box-shadow .18s ease, background .2s ease, border-color .2s ease, opacity .18s ease;
+      position: absolute; width:60px; height:60px; border:1px solid rgba(255,255,255,.08);
+      border-radius:16px; color:white; font-weight:800; cursor:pointer; font-size:22px;
+      transition: transform .12s ease, box-shadow .15s ease, background .2s ease;
+      background: linear-gradient(145deg, rgba(255,255,255,.08), rgba(255,255,255,.03));
+      box-shadow: var(--shadow);
     }
-    .menu-radial button:hover{ transform: scale(1.06); box-shadow: 0 10px 26px rgba(0,0,0,0.8); }
+    .menu-radial button:hover{ transform: scale(1.08); box-shadow: 0 16px 34px rgba(0,0,0,.55); }
+    .btn-libre{ background: linear-gradient(145deg, rgba(34,197,94,.3), rgba(34,197,94,.12)); top:-70px; left:-10px; }
+    .btn-banio{ background: linear-gradient(145deg, rgba(245,158,11,.3), rgba(245,158,11,.12)); top:10px; left:-70px; font-size:18px; color:#111827; font-weight:900;}
+    .btn-almuerzo{ background: linear-gradient(145deg, rgba(99,102,241,.3), rgba(99,102,241,.12)); top:10px; left:50px;}
 
-    .btn-libre   { top:-72px; left:-10px;   background:#0e2a19; border-color:#1f3e2b; }
-    .btn-banio   { top:  8px; left:-90px;   background:#2a260b; color:#facc15; border-color:#4a3e12; }
-    .btn-almuerzo{ top:  8px; left: 70px;   background:#0c1e35; color:#96c7ff; border-color:#163253; }
+    /* ===== Botones flotantes ===== */
+    .fab{
+      position: fixed; top: 14px; right: 14px;
+      display:flex; gap:10px; z-index: 3000;
+    }
+    .fab button{
+      padding:10px 12px; border-radius:12px; border:1px solid rgba(255,255,255,.08);
+      background: linear-gradient(145deg, rgba(255,255,255,.08), rgba(255,255,255,.03));
+      color:white; font-weight:700; letter-spacing:.2px;
+      box-shadow: var(--shadow); cursor:pointer;
+      transition: transform .12s ease, box-shadow .15s ease, opacity .2s ease;
+      opacity:0;
+    }
+    .fab button.show{ opacity:1; }
+    .fab button:hover{ transform: translateY(-1px); box-shadow: 0 14px 34px rgba(0,0,0,.55); }
 
-    /* Sutileza: tooltip via title nativo del navegador (no CSS) */
+    /* Alerta baño */
+    .alerta-banio{
+      position: fixed; top: 10%; left: 50%;
+      transform: translate(-50%, -50%) scale(.9);
+      background: linear-gradient(165deg,#0b1220,#0d1320);
+      color:white; padding: 26px 32px; border-radius:16px; font-size:18px; font-weight:800;
+      text-align:center; border: 1px solid rgba(255,255,255,.08);
+      box-shadow: 0 0 0 3px rgba(239,68,68,.15), 0 20px 60px rgba(0,0,0,.6);
+      z-index: 2500; opacity: 0; pointer-events: none; transition: all .22s ease;
+    }
+    .alerta-banio.show{ opacity:1; transform: translate(-50%, -50%) scale(1); }
+
   </style>
 </head>
+
 <body>
-  <header>
-    <h1>Executive Information Systems</h1>
+  <header class="app">
+    <div class="brand">
+      <div class="logo">📞</div>
+      <div class="title">
+        <h1>EIS — Panel de Agentes</h1>
+        <div class="subtitle">Control visual de estados y llamadas en tiempo real</div>
+      </div>
+    </div>
+    <div class="info-bar" id="infoBar">
+      <span class="dot"></span>
+      <span id="serverClock">Sincronizando…</span>
+      <span class="sep"></span>
+      <span>Hora de servidor</span>
+    </div>
   </header>
 
   <div class="contenedor" id="contenedor"></div>
 
   <!-- Menú radial -->
   <div id="menuGlobal" class="menu-radial" aria-hidden="true">
-    <div class="ring-base"></div>
-    <button class="btn-libre"    title="Marcar Libre">✔</button>
-    <button class="btn-banio"    title="Marcar Baño">🚻</button>
+    <button class="btn-libre" title="Marcar Libre">✔</button>
+    <button class="btn-banio" title="Marcar Baño">🚻</button>
     <button class="btn-almuerzo" title="Marcar Almuerzo">🍔</button>
   </div>
 
-  <!-- Audio: beep sutil para excedido (base64) -->
-  <audio id="sndExcedido" preload="auto">
-    <source src="data:audio/wav;base64,UklGRnQAAABXQVZFZm10IBAAAAABAAEAESsAACJWAAACABYAZGF0YVwAAABwAAD/AAD/AAAA/wAAAP8AAP8AAP8AAP8AAP8AAP8AAP8AAP8AAP8AAP8AAP8AAP8AAP7//v/9//3//v/+/wAA/wAA/wAA/wAA/v/+//3//f/8//z//P/8//v/+//7//z//P/8//7//v/9//3//v/+//8AAAIAAwAEAAUABgAHAAcABwAHAAcABgAFBAQDAgEAAP7//v/9//z//P/7//v/+//7//v//AAAAg==" type="audio/wav">
-  </audio>
+  <!-- Botones flotantes (Shift + :) -->
+  <div class="fab" id="fab">
+    <button id="btnDashboard">📊 Encuestas</button>
+    <button id="btnExcel">⬇️ Exportar</button>
+    <button id="btnReset">⟳ Reset</button>
+  </div>
 
   <script type="module">
-    /****************** IMPORTS (Firebase CDN v9 modular) ******************/
+    import { increment } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore.js";
     import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-app.js";
     import {
-      getFirestore, doc, getDoc, setDoc, updateDoc, onSnapshot
+      getFirestore, doc, setDoc, updateDoc, onSnapshot, collection,
+      getDocs, addDoc, serverTimestamp, deleteDoc
     } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore.js";
+    import * as XLSX from "https://cdn.jsdelivr.net/npm/xlsx@0.18.5/+esm";
 
-    /****************** FIREBASE: TU NUEVO PROYECTO ******************/
+    /* =========================
+       Firebase
+    ========================== */
     const firebaseConfig = {
-      apiKey: "AIzaSyAdLGsavsans6OmLeyD_9TndcrAObDQgqA",
-      authDomain: "bitacora-3fc27.firebaseapp.com",
-      projectId: "bitacora-3fc27",
-      storageBucket: "bitacora-3fc27.firebasestorage.app",
-      messagingSenderId: "921769640813",
-      appId: "1:921769640813:web:db160482d20ac32e595064",
-      measurementId: "G-3Z8GD6T0ML"
+      apiKey: "AIzaSyDeAbygOcoV1G9Zh8wd7topjXttlmJ892Y",
+      authDomain: "workplace-18675.firebaseapp.com",
+      projectId: "workplace-18675",
+      storageBucket: "workplace-18675.appspot.com",
+      messagingSenderId: "606737102100",
+      appId: "1:606737102100:web:7084120bdabf1f8ca2be01"
     };
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
 
-    /****************** DATOS ******************/
+    /* =========================
+       Sincronización de hora
+    ========================== */
+    let desfaseServidor = 0;
+    const getServerNow = () => Date.now() + desfaseServidor;
+    const infoBar = document.getElementById("serverClock");
+
+    function tickServerClock(){
+      const d = new Date(getServerNow());
+      const fmt = d.toLocaleString("es-GT", { timeZone: "America/Guatemala", hour12:false });
+      if (infoBar) infoBar.textContent = fmt;
+    }
+    setInterval(tickServerClock, 1000);
+
+    /* =========================
+       Datos y refs
+    ========================== */
     const nombres = ["Nestor","Daniel","Andres","Rafael","Alejandro","Tania","Marta","Pablo","Saraí","Michi","Evelyn","Merlin","Ashley","Gabriela","Bryan","Diego","Jorge","Joselyne","Andrea","Omar","Javier","Synndy","Anthony","Mildred","Madelin","Majo","Monica","Jackeline"];
 
-    // Fotos opcionales por nombre (si no hay, usa iniciales)
-    const fotos = {
-      // "Nestor": "https://tu-cdn/nestor.jpg",
-      // "Daniel": "https://tu-cdn/daniel.jpg",
+    const agentes = [
+      { nombre: "Sarahi Churumia", ext: 8001, days:{1:"09:00",2:"09:00",3:"09:00",4:"10:00",5:"10:00",6:"07:00"} },
+      { nombre: "Justa Jaes", ext: 8002, default: "09:00", sabado: "09:00" },
+      { nombre: "Javier Alvarez", ext: 8003, default: "08:00", sabado: "07:00" },
+      { nombre: "Merlin Bajan", ext: 8004, default: "08:00", sabado: null },
+      { nombre: "Mónica Ordónez", ext: 8005, default: "09:00", sabado: "09:00" },
+      { nombre: "Alejandro Vásquez", ext: 8006, days:{1:"09:00",2:"09:00",3:"08:00",4:"08:00",5:"08:00",6:"07:00"} },
+      { nombre: "Joselyne Velásquez", ext: 8007, default: "09:00", sabado: "09:00" },
+      { nombre: "Jackeline Castillo", ext: 8008, days:{1:"10:00",2:"10:00",3:"09:00",4:"09:00",5:"09:00",6:"07:00"} },
+      { nombre: "Mildred Cordero", ext: 8009, default: "08:00", sabado: "09:00" },
+      { nombre: "Tania de León", ext: 8010, days:{1:"09:00",2:"09:00",3:"09:00",4:"10:00",5:"10:00",6:"07:00"} },
+      { nombre: "Anthony García", ext: 8011, default: "09:00", sabado: "09:00" },
+      { nombre: "Jorge Veliz", ext: 8013, default: "09:00", sabado: "09:00" },
+      { nombre: "Daniel Coyoy", ext: 8014, default: "08:00", sabado: null },
+      { nombre: "Néstor Galvez", ext: 8015, days:{1:"10:00",2:"10:00",3:"09:00",4:"09:00",5:"09:00",6:"07:00"} },
+      { nombre: "Andrea Jiménez", ext: 8016, default: "09:00", sabado: "09:00" },
+      { nombre: "Diego Chiché", ext: 8017, default: "09:00", sabado: "09:00" },
+      { nombre: "Ashley López", ext: 8018, default: "08:00", sabado: "07:00" },
+      { nombre: "Synndy Sanchez", ext: 8020, default: "09:00", sabado: "09:00" },
+      { nombre: "Mishell de León", ext: 8021, days:{1:"10:00",2:"10:00",3:"09:00",4:"09:00",5:"09:00",6:"07:00"} },
+      { nombre: "Omar Ramirez", ext: 8022, default: "09:00", sabado: "08:00" },
+      { nombre: "Madelin Ovando", ext: 8023, default: "09:00", sabado: "09:00" },
+      { nombre: "Evelyn de León", ext: 8024, days:{1:"10:00",2:"10:00",3:"09:00",4:"09:00",5:"09:00",6:"07:00"} },
+      { nombre: "Andres Marín", ext: 8025, default: "08:00", sabado: null },
+      { nombre: "Bryan Hernandez", ext: 8026, default: "09:00", sabado: "09:00" },
+      { nombre: "Rafael Sánchez", ext: 8027, days:{1:"09:00",2:"09:00",3:"09:00",4:"10:00",5:"10:00",6:"07:00"} },
+      { nombre: "Marta Morales", ext: 8028, days:{1:"10:00",2:"10:00",3:"09:00",4:"09:00",5:"09:00",6:"07:00"} },
+      { nombre: "Pablo Ibañez", ext: 8029, days:{1:"08:00",2:"08:00",3:"08:00",4:"08:00",5:"08:00",6:"07:00"} },
+      { nombre: "María Perdomo", ext: 8030, default: "09:00", sabado: "09:00" }
+    ];
+
+    function obtenerHorarioAgente(agente){
+      const hoy = new Date(getServerNow()).getDay();
+      if (agente.days) return agente.days[hoy];
+      if (hoy === 6) return agente.sabado;
+      return agente.default;
+    }
+
+    const extensiones = {
+      Saraí: "8001", Gabriela: "8002", Javier: "8003", Merlin: "8004", Monica: "8005",
+      Alejandro: "8006", Joselyne: "8007", Jackeline: "8008", Mildred: "8009", Tania: "8010",
+      Anthony: "8011", Jorge: "8013", Daniel: "8014", Nestor: "8015", Andrea: "8016",
+      Diego: "8017", Ashley: "8018", Synndy: "8020", Michi: "8021", Omar: "8022",
+      Madelin: "8023", Evelyn: "8024", Andres: "8025", Bryan: "8026", Rafael: "8027",
+      Marta: "8028", Pablo: "8029", Majo: "8030"
     };
 
     const LIMITE = { baño: 15 * 60, almuerzo: 60 * 60 };
-    const refBanio = doc(db, "banos", "estado");
 
     const contenedor = document.getElementById("contenedor");
-    const menuGlobal = document.getElementById("menuGlobal");
-    const sndExcedido = document.getElementById("sndExcedido");
-
     const tarjetas = {};
-    let tarjetaActiva = null; // nombre de la tarjeta seleccionada
+    const menuGlobal = document.getElementById("menuGlobal");
+    let tarjetaActiva = null;
 
-    /****************** HELPERS UI ******************/
-    const iniciales = (nombre) =>
-      nombre.split(" ").map(p => p[0]?.toUpperCase()).join("").slice(0,2);
+    const refBanio = doc(db, "callcenter", "estado");
 
-    const flashTarjeta = (el) => {
-      el.classList.remove("flash");
-      void el.offsetWidth; // reflow
-      el.classList.add("flash");
-      setTimeout(() => el.classList.remove("flash"), 850);
-    };
+    function mostrarAlertaBanio(){
+      const alerta = document.getElementById("alertaBanio");
+      alerta.classList.add("show");
+      setTimeout(()=> alerta.classList.remove("show"), 2500);
+    }
 
-    const setActiva = (nombre) => {
-      // quitar activa en todas
-      document.querySelectorAll(".tarjeta").forEach(t => t.classList.remove("activa"));
-      if (!nombre || !tarjetas[nombre]) return;
-      tarjetas[nombre].tarjeta.classList.add("activa");
-      tarjetaActiva = nombre;
-    };
+    // Util: convertir inicio a ms
+    function inicioToMs(val){
+      if (val == null) return null;
+      if (typeof val.toMillis === "function") return val.toMillis();
+      if (typeof val === "number") return val;
+      return null;
+    }
 
-    /****************** CREAR TARJETAS ******************/
-    nombres.forEach(nombre => {
-      const tarjeta = document.createElement("div");
-      tarjeta.className = "tarjeta";
+    /* =========================
+       UI: Construcción de tarjetas
+    ========================== */
+    function initialsFromName(n){
+      const p = n.split(/\s+/).filter(Boolean);
+      if (p.length === 1) return p[0].slice(0,2).toUpperCase();
+      return (p[0][0] + p[1][0]).toUpperCase();
+    }
+
+    nombres.forEach(nombre=>{
+      const card = document.createElement("div");
+      card.className = "tarjeta";
 
       const flip = document.createElement("div");
       flip.className = "flip";
 
-      // --- FRONTAL ---
+      // Frontal
       const frontal = document.createElement("div");
       frontal.className = "frontal active";
 
+      const head = document.createElement("div");
+      head.className = "card-head";
+
       const avatar = document.createElement("div");
       avatar.className = "avatar";
-      if (fotos[nombre]) {
-        avatar.classList.add("foto");
-        avatar.style.backgroundImage = `url("${fotos[nombre]}")`;
-      } else {
-        avatar.textContent = iniciales(nombre);
-      }
+      avatar.textContent = initialsFromName(nombre);
 
-      const spanNombre = document.createElement("div");
-      spanNombre.className = "nombre";
-      spanNombre.textContent = nombre;
+      const nameEl = document.createElement("div");
+      nameEl.className = "nombre";
+      nameEl.textContent = nombre;
+
+      const loginSpan = document.createElement("div");
+      loginSpan.className = "login-superior";
+      loginSpan.textContent = "--";
+
+      head.append(avatar, nameEl, loginSpan);
 
       const estado = document.createElement("div");
       estado.className = "estado libre";
-      estado.textContent = "Libre";
+      estado.innerHTML = `<span class="dot-sm"></span> Libre`;
 
-      const tiempoBanio = document.createElement("div");
-      tiempoBanio.className = "tiempo";
-      tiempoBanio.innerHTML = `Baño: <span class="cronometro">0:00</span>`;
+      const timers = document.createElement("div");
+      timers.className = "timers";
 
-      const tiempoAlmuerzo = document.createElement("div");
-      tiempoAlmuerzo.className = "tiempo";
-      tiempoAlmuerzo.innerHTML = `Almuerzo: <span class="cronometro">0:00</span>`;
+      const timerB = document.createElement("div");
+      timerB.className = "timer";
+      timerB.innerHTML = `<div class="t-label">Baño</div><div class="t-value"><span class="cronometro">0:00</span></div>`;
+
+      const timerA = document.createElement("div");
+      timerA.className = "timer";
+      timerA.innerHTML = `<div class="t-label">Almuerzo</div><div class="t-value"><span class="cronometro">0:00</span></div>`;
+
+      timers.append(timerB, timerA);
 
       const estadisticas = document.createElement("div");
       estadisticas.className = "estadisticas";
-      estadisticas.textContent = "—";
+      estadisticas.innerHTML = `
+        <span class="chip"><span class="i">📞⬅️</span> <span class="v">0</span></span>
+        <span>·</span>
+        <span class="chip"><span class="i">📞➡️</span> <span class="v">0</span></span>
+      `;
 
       const iconTelefono = document.createElement("div");
       iconTelefono.className = "icon-telefono";
-      iconTelefono.textContent = "📞";
+      iconTelefono.textContent = "✍️";
 
-      frontal.append(avatar, spanNombre, estado, tiempoBanio, tiempoAlmuerzo, estadisticas, iconTelefono);
+      frontal.append(head, estado, timers, estadisticas, iconTelefono);
 
-      // --- TRASERA (se deja por si la usas luego) ---
+      // Trasera
       const trasera = document.createElement("div");
       trasera.className = "trasera";
-
-      const iconBack = document.createElement("div");
-      iconBack.className = "regresar";
-      iconBack.textContent = "↩";
+      const backBtn = document.createElement("div");
+      backBtn.className = "regresar";
+      backBtn.textContent = "↩️";
 
       const registro = document.createElement("div");
       registro.className = "registro";
 
-      const inputNumero = document.createElement("input");
-      inputNumero.placeholder = "Número de teléfono";
-
-      const selectCant = document.createElement("select");
-      ["1","2"].forEach(val => {
+      const selectTipo = document.createElement("select");
+      ["Entrante", "Saliente"].forEach(t=>{
         const opt = document.createElement("option");
-        opt.value = val;
-        opt.text = val + " llamada" + (val === "2" ? "s" : "");
-        selectCant.appendChild(opt);
+        opt.value = t; opt.textContent = t; selectTipo.appendChild(opt);
       });
+
+      const inputCantidad = document.createElement("input");
+      inputCantidad.type = "number";
+      inputCantidad.min = "1";
+      inputCantidad.value = "1";
+      inputCantidad.placeholder = "Cantidad";
 
       const botones = document.createElement("div");
       botones.className = "botones";
       const btnCheck = document.createElement("button");
-      btnCheck.className = "btn-check"; btnCheck.textContent = "✅";
+      btnCheck.className = "btn-check";
+      btnCheck.textContent = "✅";
       const btnX = document.createElement("button");
-      btnX.className = "btn-x"; btnX.textContent = "❌";
-      botones.append(btnX, btnCheck);
+      btnX.className = "btn-x";
+      btnX.textContent = "❌";
+      btnX.style.display = "none";
 
-      registro.append(inputNumero, selectCant, botones);
-      trasera.append(iconBack, registro);
+      botones.append(btnX, btnCheck);
+      registro.append(selectTipo, inputCantidad, botones);
+      trasera.append(backBtn, registro);
 
       flip.append(frontal, trasera);
-      tarjeta.appendChild(flip);
-      contenedor.appendChild(tarjeta);
+      card.appendChild(flip);
+      contenedor.appendChild(card);
 
-      // refs
       tarjetas[nombre] = {
-        tarjeta, estado, tiempoBanio, tiempoAlmuerzo, info:{},
-        estadisticas, frontal, trasera, inputNumero, selectCant,
-        btnCheck, btnX, prevTipo:null,
-        exceededBanioPlayed:false, exceededAlmuerzoPlayed:false
+        estado,
+        tiempoBanio: timerB.querySelector(".cronometro"),
+        tiempoAlmuerzo: timerA.querySelector(".cronometro"),
+        loginSpan,
+        info: {},
+        estadisticas,
+        frontal,
+        trasera,
+        selectTipo,
+        inputCantidad,
+        btnCheck
       };
 
-      // eventos flip
-      iconTelefono.onclick = (e)=>{ e.stopPropagation(); frontal.classList.remove("active"); trasera.classList.add("active"); };
-      iconBack.onclick = (e)=>{ e.stopPropagation(); trasera.classList.remove("active"); frontal.classList.add("active"); };
-
-      // abrir menú radial + seleccionar tarjeta
-      tarjeta.addEventListener("click", (e) => {
+      iconTelefono.onclick = e => {
         e.stopPropagation();
-        if (trasera.classList.contains("active")) return; // no abrir si está la trasera
-        document.querySelectorAll(".tarjeta").forEach(t => t.classList.remove("dimmed"));
+        frontal.classList.remove("active");
+        trasera.classList.add("active");
+      };
+      backBtn.onclick = e => {
+        e.stopPropagation();
+        trasera.classList.remove("active");
+        frontal.classList.add("active");
+      };
+
+      registro.addEventListener("click", e => e.stopPropagation());
+      btnCheck.onclick = ()=> registrarLlamada(nombre);
+
+      // Abrir menú radial
+      card.addEventListener("click",(e)=>{
+        e.stopPropagation();
+        if (trasera.classList.contains("active")) return;
+
+        document.querySelectorAll(".tarjeta").forEach(t=> t.classList.remove("dimmed"));
         menuGlobal.classList.remove("active");
-        const rect = tarjeta.getBoundingClientRect();
+
+        const rect = card.getBoundingClientRect();
         menuGlobal.style.top = `${rect.top + rect.height/2}px`;
         menuGlobal.style.left = `${rect.left + rect.width/2}px`;
-        tarjeta.classList.add("dimmed");
-        setActiva(nombre); // marcar activa
+
+        card.classList.add("dimmed");
+        tarjetaActiva = nombre;
         menuGlobal.classList.add("active");
         menuGlobal.setAttribute("aria-hidden","false");
       });
-
-      // evitar que clicks adentro de la trasera cierren/propaguen
-      registro.addEventListener("click", e => e.stopPropagation());
     });
 
-    // cerrar menú al hacer click fuera
-    document.addEventListener("click", () => {
+    document.addEventListener("click", ()=>{
       menuGlobal.classList.remove("active");
       menuGlobal.setAttribute("aria-hidden","true");
-      document.querySelectorAll(".tarjeta").forEach(t => t.classList.remove("dimmed"));
+      document.querySelectorAll(".tarjeta").forEach(t=> t.classList.remove("dimmed"));
+      tarjetaActiva = null;
     });
 
-    // === Menú radial: cambios de estado ===
-    menuGlobal.querySelector(".btn-libre").onclick    = () => accionMenu(tarjetaActiva, null);
-    menuGlobal.querySelector(".btn-banio").onclick    = () => accionMenu(tarjetaActiva, "baño");
-    menuGlobal.querySelector(".btn-almuerzo").onclick = () => accionMenu(tarjetaActiva, "almuerzo");
+    // Acciones de menú radial
+    menuGlobal.querySelector(".btn-libre").onclick = ()=> accionMenu(tarjetaActiva, null);
+    menuGlobal.querySelector(".btn-banio").onclick = ()=> accionMenu(tarjetaActiva, "baño");
+    menuGlobal.querySelector(".btn-almuerzo").onclick = ()=> accionMenu(tarjetaActiva, "almuerzo");
 
     async function accionMenu(nombre, tipo){
-      if(!nombre) return;
+      if (!nombre) return;
+
+      // Limite de 2 en baño (validación visual)
+      if (tipo === "baño"){
+        let enBanio = 0;
+        nombres.forEach(n=>{
+          if (tarjetas[n].info?.tipo === "baño") enBanio++;
+        });
+        if (enBanio >= 2){
+          mostrarAlertaBanio();
+          return;
+        }
+      }
+
       await toggleEstado(nombre, tipo);
     }
 
-    /****************** ESTADO (Firestore) ******************/
-    async function ensureDocInicial() {
-      const snap = await getDoc(refBanio);
-      if (!snap.exists()) {
-        const inicial = {};
-        nombres.forEach(n => {
-          inicial[n] = { tipo:null, inicio:null, tiempoBanio:0, tiempoAlmuerzo:0 };
-        });
-        await setDoc(refBanio, inicial);
-      }
-    }
-    await ensureDocInicial();
-
     async function toggleEstado(nombre, tipo){
-      const info = tarjetas[nombre].info || { tipo:null, inicio:null, tiempoBanio:0, tiempoAlmuerzo:0 };
-      const ahora = Date.now();
+      const current = tarjetas[nombre].info || { tipo:null, inicio:null, tiempoBanio:0, tiempoAlmuerzo:0 };
+      let acBanio = current.tiempoBanio || 0;
+      let acAlmuerzo = current.tiempoAlmuerzo || 0;
 
-      const inicioMs = (val) => {
-        if (!val && val !== 0) return null;
-        if (typeof val === "number") return val;
-        if (val?.toMillis) return val.toMillis();
-        return null;
-      };
-
-      if(info.tipo){
-        const ini = inicioMs(info.inicio);
-        const segs = ini ? Math.floor((ahora - ini)/1000) : 0;
-        let acBanio = info.tiempoBanio;
-        let acAlmuerzo = info.tiempoAlmuerzo;
-        if(info.tipo === "baño") acBanio += segs;
-        if(info.tipo === "almuerzo") acAlmuerzo += segs;
-
-        if (tipo === info.tipo || tipo === null){
-          await updateDoc(refBanio, { [nombre]: { tipo:null, inicio:null, tiempoBanio:acBanio, tiempoAlmuerzo:acAlmuerzo } });
-        } else {
-          await updateDoc(refBanio, { [nombre]: { tipo:tipo, inicio:ahora, tiempoBanio:acBanio, tiempoAlmuerzo:acAlmuerzo } });
-        }
-      } else {
-        if (!tipo) return; // ya está libre
-        await updateDoc(refBanio, { [nombre]: { tipo:tipo, inicio:ahora, tiempoBanio:info.tiempoBanio || 0, tiempoAlmuerzo:info.tiempoAlmuerzo || 0 } });
+      if (current.tipo){
+        const ini = inicioToMs(current.inicio);
+        const segs = ini ? Math.max(0, Math.floor((getServerNow() - ini) / 1000)) : 0;
+        if (current.tipo === "baño") acBanio += segs;
+        if (current.tipo === "almuerzo") acAlmuerzo += segs;
       }
+
+      let nuevoTipo = tipo;
+      if (tipo === current.tipo || tipo === null) nuevoTipo = null;
+
+      await setDoc(refBanio, {
+        [nombre]: {
+          tipo: nuevoTipo,
+          inicio: nuevoTipo ? serverTimestamp() : null,
+          tiempoBanio: acBanio,
+          tiempoAlmuerzo: acAlmuerzo
+        }
+      }, { merge: true });
     }
 
-    /****************** ESCUCHAR ESTADO (animado) ******************/
-    onSnapshot(refBanio, (snap)=>{
-      if(!snap.exists()) return;
-      const data = snap.data();
+    /* =========================
+       Estado global + desfase
+    ========================== */
+    onSnapshot(refBanio, (docSnap)=>{
+      if (docSnap.metadata.hasPendingWrites === false){
+        const t = docSnap.updateTime?.toMillis?.();
+        if (t) desfaseServidor = t - Date.now();
+      }
+
+      const data = docSnap.data() || {};
       nombres.forEach(nombre=>{
-        const info = data[nombre] || { tipo:null, inicio:null, tiempoBanio:0, tiempoAlmuerzo:0 };
-        const card = tarjetas[nombre];
-        if(!card) return;
+        const info = data?.[nombre];
+        if (!info || !tarjetas[nombre]) return;
+        tarjetas[nombre].info = info;
 
-        // animación si cambió
-        const prev = card.prevTipo;
-        const nuevo = info.tipo || null;
-        if(prev !== nuevo && card.tarjeta){
-          flashTarjeta(card.tarjeta);
-          card.prevTipo = nuevo;
-          // Al cambiar de estado, resetear "excedido" beep para próxima excedencia
-          if (nuevo !== "baño") card.exceededBanioPlayed = false;
-          if (nuevo !== "almuerzo") card.exceededAlmuerzoPlayed = false;
-        }
-
-        card.info = info;
-        if(info.tipo){
-          card.estado.textContent = (info.tipo === "baño") ? "En Baño" : "Almorzando";
-          card.estado.className = "estado ocupado";
+        const el = tarjetas[nombre].estado;
+        if (info.tipo){
+          if (info.tipo === "baño"){
+            el.className = "estado ocupado";
+            el.innerHTML = `<span class="dot-sm"></span> En baño`;
+          } else {
+            el.className = "estado ocupado";
+            el.innerHTML = `<span class="dot-sm"></span> Almorzando`;
+          }
         } else {
-          card.estado.textContent = "Libre";
-          card.estado.className = "estado libre";
+          el.className = "estado libre";
+          el.innerHTML = `<span class="dot-sm"></span> Libre`;
         }
       });
     });
 
-    /****************** CRONÓMETROS + SONIDO EXCEDIDO ******************/
+    // Cronómetro en UI
     setInterval(()=>{
-      const ahora = Date.now();
+      const ahora = getServerNow();
       nombres.forEach(nombre=>{
-        const card = tarjetas[nombre];
-        if(!card) return;
-        const info = card.info || {};
-        let tBanio = info.tiempoBanio || 0;
-        let tAlmuerzo = info.tiempoAlmuerzo || 0;
+        const info = tarjetas[nombre].info; if (!info) return;
 
-        const inicioVal = info.inicio;
-        const ini = (inicioVal && inicioVal.toMillis) ? inicioVal.toMillis() : (typeof inicioVal === "number" ? inicioVal : null);
+        let tB = info.tiempoBanio || 0;
+        let tA = info.tiempoAlmuerzo || 0;
 
-        if(info.tipo === "baño" && ini) tBanio += Math.floor((ahora - ini)/1000);
-        if(info.tipo === "almuerzo" && ini) tAlmuerzo += Math.floor((ahora - ini)/1000);
+        const ini = inicioToMs(info.inicio);
+        if (info.tipo === "baño" && ini) tB += Math.max(0, Math.floor((ahora - ini)/1000));
+        if (info.tipo === "almuerzo" && ini) tA += Math.max(0, Math.floor((ahora - ini)/1000));
 
-        const minB = Math.floor(tBanio/60), secB = tBanio % 60;
-        const minA = Math.floor(tAlmuerzo/60), secA = tAlmuerzo % 60;
+        const minB = Math.floor(tB/60), secB = tB % 60;
+        const minA = Math.floor(tA/60), secA = tA % 60;
+        tarjetas[nombre].tiempoBanio.textContent = `${minB}:${secB.toString().padStart(2,"0")}`;
+        tarjetas[nombre].tiempoAlmuerzo.textContent = `${minA}:${secA.toString().padStart(2,"0")}`;
 
-        card.tiempoBanio.innerHTML    = `Baño: <span class="cronometro">${minB}:${secB.toString().padStart(2,"0")}</span>`;
-        card.tiempoAlmuerzo.innerHTML = `Almuerzo: <span class="cronometro">${minA}:${secA.toString().padStart(2,"0")}</span>`;
-
-        // Excedido + sonido (una sola vez por excedencia)
-        if(info.tipo === "baño" && tBanio > LIMITE.baño){
-          if (!card.exceededBanioPlayed){
-            sndExcedido.currentTime = 0;
-            sndExcedido.play().catch(()=>{ /* ignorar bloqueo autoplay */ });
-            card.exceededBanioPlayed = true;
-          }
-          card.estado.className = "estado excedido";
-          card.estado.textContent = "Baño excedido";
+        // Excedidos
+        const est = tarjetas[nombre].estado;
+        if (info.tipo === "baño" && tB > LIMITE.baño){
+          est.className = "estado excedido";
+          est.innerHTML = `<span class="dot-sm"></span> Baño excedido`;
         }
-        if(info.tipo === "almuerzo" && tAlmuerzo > LIMITE.almuerzo){
-          if (!card.exceededAlmuerzoPlayed){
-            sndExcedido.currentTime = 0;
-            sndExcedido.play().catch(()=>{ /* ignorar bloqueo autoplay */ });
-            card.exceededAlmuerzoPlayed = true;
-          }
-          card.estado.className = "estado excedido";
-          card.estado.textContent = "Almuerzo excedido";
+        if (info.tipo === "almuerzo" && tA > LIMITE.almuerzo){
+          est.className = "estado excedido";
+          est.innerHTML = `<span class="dot-sm"></span> Almuerzo excedido`;
         }
       });
     }, 1000);
 
-    /****************** ATAJOS DE TECLADO ******************/
-    // L: Libre, B: Baño, A: Almuerzo (sobre tarjeta activa)
-    document.addEventListener("keydown", (e) => {
-      const key = e.key.toLowerCase();
-      if (["l","b","a","c"].includes(key)) e.preventDefault();
+    /* =========================
+       Llamadas
+    ========================== */
+    async function registrarLlamada(nombre){
+      const ui = tarjetas[nombre];
+      const tipo = ui.selectTipo.value;
+      const cantidad = Number(ui.inputCantidad.value);
 
-      if (key === "c") {
-        // Modo compacto
-        document.body.classList.toggle("compacto");
+      if (!cantidad || cantidad < 1){
+        alert("Ingrese una cantidad válida");
         return;
       }
-      if (!tarjetaActiva) return; // no hay tarjeta seleccionada
 
-      if (key === "l") accionMenu(tarjetaActiva, null);
-      if (key === "b") accionMenu(tarjetaActiva, "baño");
-      if (key === "a") accionMenu(tarjetaActiva, "almuerzo");
+      try{
+        await addDoc(collection(db, "llamadas_test"), {
+          agente: nombre, tipo, cantidad, timestamp: serverTimestamp()
+        });
+
+        const extension = extensiones[nombre];
+        const hoy = new Date(getServerNow()).toISOString().split("T")[0];
+        const refAgente = doc(db, "agentes_sabado", `${extension}_${hoy}`);
+
+        if (tipo === "Entrante"){
+          await updateDoc(refAgente, { entrantes: increment(cantidad) });
+        } else {
+          await updateDoc(refAgente, { salientes: increment(cantidad) });
+        }
+
+        ui.inputCantidad.value = 1;
+        ui.trasera.classList.remove("active");
+        ui.frontal.classList.add("active");
+      }catch(e){
+        console.error(e);
+      }
+    }
+
+    onSnapshot(collection(db, "llamadas_test"), (snapshot)=>{
+      const porAgente = {};
+      snapshot.forEach(d=>{
+        const it = d.data();
+        porAgente[it.agente] ??= { entrantes:0, salientes:0 };
+        if (it.tipo === "Entrante") porAgente[it.agente].entrantes += it.cantidad || 0;
+        if (it.tipo === "Saliente") porAgente[it.agente].salientes += it.cantidad || 0;
+      });
+
+      nombres.forEach(n=>{
+        const stats = porAgente[n] || { entrantes:0, salientes:0 };
+        const el = tarjetas[n].estadisticas;
+        el.innerHTML = `
+          <span class="chip"><span class="i">📞⬅️</span> <span class="v">${stats.entrantes}</span></span>
+          <span>·</span>
+          <span class="chip"><span class="i">📞➡️</span> <span class="v">${stats.salientes}</span></span>
+        `;
+      });
     });
 
+    onSnapshot(collection(db, "agentes_sabado"), (snapshot)=>{
+      snapshot.forEach(docSnap=>{
+        const hoy = new Date(getServerNow()).toISOString().split("T")[0];
+        if (!docSnap.id.endsWith(hoy)) return;
+
+        const extension = docSnap.id.split("_")[0];
+        const data = docSnap.data();
+        const nombre = Object.keys(extensiones).find(n=> extensiones[n] === extension);
+        if (!nombre || !tarjetas[nombre]) return;
+
+        const login = data.login || "--";
+        const ls = tarjetas[nombre].loginSpan;
+        ls.textContent = login;
+
+        const ag = agentes.find(a=> a.ext == extension);
+        if (ag && login !== "--"){
+          const loginMin = login.split(":")[0]*60 + (login.split(":")[1]*1);
+          const horario = obtenerHorarioAgente(ag);
+          if (!horario) return;
+
+          const hm = horario.split(":");
+          const horarioMin = hm[0]*60 + (hm[1]*1);
+          ls.classList.remove("login-puntual","login-tarde");
+          if (loginMin > horarioMin) ls.classList.add("login-tarde");
+          else ls.classList.add("login-puntual");
+        }
+      });
+    });
+
+    /* =========================
+       FAB (acciones) + teclado
+    ========================== */
+    const fab = document.getElementById("fab");
+    const btnDashboard = document.getElementById("btnDashboard");
+    const btnExcel = document.getElementById("btnExcel");
+    const btnReset = document.getElementById("btnReset");
+
+    btnDashboard.onclick = ()=>{
+      window.open(
+        "https://firebasestorage.googleapis.com/v0/b/workplace-18675.firebasestorage.app/o/Dashboard%20Encuestas.html?alt=media&token=78d463d1-3957-4d2b-9fdb-e7f435babaff",
+        "_blank"
+      );
+    };
+
+    document.addEventListener("keydown",(e)=>{
+      if (e.shiftKey && e.key.toLowerCase() === ":"){
+        [btnDashboard, btnExcel, btnReset].forEach(b=>{
+          b.classList.toggle("show");
+        });
+      }
+    });
+
+    btnReset.onclick = async ()=>{
+      if (!confirm("¿Seguro que deseas REINICIAR todo (tiempos y llamadas)?")) return;
+
+      // Reset local
+      nombres.forEach(nombre=>{
+        const t = tarjetas[nombre];
+        t.info.tiempoBanio = 0;
+        t.info.tiempoAlmuerzo = 0;
+        t.info.tipo = null;
+        t.info.inicio = null;
+        t.estado.className = "estado libre";
+        t.estado.innerHTML = `<span class="dot-sm"></span> Libre`;
+        t.tiempoBanio.textContent = `0:00`;
+        t.tiempoAlmuerzo.textContent = `0:00`;
+      });
+
+      // Reset en Firestore
+      const resetData = {};
+      nombres.forEach(nombre=>{
+        resetData[nombre] = { tipo: null, inicio: null, tiempoBanio: 0, tiempoAlmuerzo: 0 };
+      });
+      await setDoc(refBanio, resetData, { merge:true });
+
+      // Borrar llamadas
+      const llamadasSnapshot = await getDocs(collection(db, "llamadas_test"));
+      for (const d of llamadasSnapshot.docs){
+        await deleteDoc(doc(db, "llamadas_test", d.id));
+      }
+
+      alert("Todo se ha reiniciado correctamente ✅");
+    };
+
+    btnExcel.onclick = async ()=>{
+      const llamadasSnapshot = await getDocs(collection(db, "llamadas_test"));
+      const data = llamadasSnapshot.docs.map(d=>{
+        const it = d.data();
+        const fecha = it.timestamp?.toDate ? it.timestamp.toDate().toLocaleString("es-GT", { timeZone: "America/Guatemala" }) : "";
+        return { Agente: it.agente || "", Tipo: it.tipo || "", Cantidad: it.cantidad || 0, Fecha: fecha };
+      });
+      if (!data.length) return alert("No hay llamadas registradas.");
+
+      const ws = XLSX.utils.json_to_sheet(data);
+      const wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, ws, "Llamadas");
+      const fechaNombre = new Date(getServerNow()).toLocaleDateString("es-GT").replace(/\//g,"-");
+      XLSX.writeFile(wb, `llamadas_${fechaNombre}.xlsx`);
+    };
   </script>
+
+  <div id="alertaBanio" class="alerta-banio">
+    Espere a que otro agente regrese del baño
+  </div>
 </body>
 </html>
