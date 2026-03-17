@@ -121,7 +121,7 @@
     .estadisticas .chip{ display:flex; align-items:center; gap:6px; }
     .estadisticas .chip .i{ filter: drop-shadow(0 0 6px rgba(255,255,255,.15)); }
 
-    /* Botón dentro de la tarjeta para registrar llamadas (reemplaza el emoji superpuesto) */
+    /* Botón dentro de la tarjeta para registrar llamadas (no obstruye el login) */
     .btn-registrar{
       margin-left:auto; padding:6px 10px; border-radius:9px; border:1px solid rgba(255,255,255,.08);
       background: linear-gradient(145deg, rgba(255,255,255,.06), rgba(255,255,255,.03)); color:white; font-weight:700; font-size:12px; cursor:pointer;
@@ -147,6 +147,7 @@
 
     .tarjeta.dimmed{ filter: brightness(.88) saturate(.95); transform: scale(.99); }
 
+    /* Menú radial */
     .menu-radial{
       position: fixed; transform: translate(-50%, -50%) scale(.92); transition: transform .22s ease, opacity .2s ease;
       pointer-events: none; z-index: 2000; opacity:0;
@@ -244,38 +245,29 @@
     const db = getFirestore(app);
 
     /* =========================
-       Sincronización de hora (AUTÉNTICA)
-       Escribimos en /_sync/clock -> now: serverTimestamp()
-       y usamos ese valor para calcular desfaseServidor.
+       Sincronización de hora REAL
+       /_sync/clock -> now: serverTimestamp()
     ========================== */
     let desfaseServidor = 0;
     const getServerNow = () => Date.now() + desfaseServidor;
 
     const refClock = doc(db, "_sync", "clock");
-
     async function pingServerClock(){
       try{
-        // Escribimos ahora=serverTimestamp para que el servidor ponga la hora
         await setDoc(refClock, { now: serverTimestamp() }, { merge: true });
       }catch(err){
         console.error("No se pudo escribir en _sync/clock:", err);
       }
     }
-
-    // Nos suscribimos para leer la hora del servidor cuando el write sea confirmado
     onSnapshot(refClock, (snap)=>{
       const data = snap.data();
       if (!data) return;
-      // Solo usamos el valor cuando NO hay escrituras pendientes (confirmado por servidor)
-      if (snap.metadata.hasPendingWrites) return;
-      const serverNowTs = data.now;
-      const ms = typeof serverNowTs?.toMillis === "function" ? serverNowTs.toMillis() : null;
+      if (snap.metadata.hasPendingWrites) return; // usar solo confirmación del servidor
+      const ms = data.now?.toMillis?.();
       if (ms){
         desfaseServidor = ms - Date.now();
       }
     });
-
-    // Hacemos un ping inicial y uno cada 30s para mantener el desfase fino
     pingServerClock();
     setInterval(pingServerClock, 30000);
 
@@ -425,7 +417,7 @@
       btnRegistrar.textContent = "Registrar llamadas";
       estadisticas.append(chips, btnRegistrar);
 
-      // Sección de registro (dentro de la misma tarjeta, sin tapar login)
+      // Sección de registro (dentro de la misma tarjeta)
       const registro = document.createElement("div");
       registro.className = "registro";
       registro.style.display = "none";
@@ -457,7 +449,7 @@
       // Front final
       frontal.append(head, estado, timers, estadisticas, registro);
 
-      // Trasera (ya no se usa para llamadas; mantenemos mínima para consistencia)
+      // Trasera (mantenida vacía para estructura)
       const trasera = document.createElement("div");
       trasera.className = "trasera";
 
@@ -479,7 +471,7 @@
         btnCheck
       };
 
-      // Abrir/cerrar formulario de registro sin tapar cabecera
+      // Abrir/cerrar formulario de registro
       btnRegistrar.onclick = (e)=> {
         e.stopPropagation();
         registro.style.display = (registro.style.display === "none") ? "block" : "none";
@@ -498,6 +490,7 @@
         // si está abierto el registro, no abrir menú
         if (registro.style.display === "block") return;
 
+        e.stopPropagation();
         document.querySelectorAll(".tarjeta").forEach(t=> t.classList.remove("dimmed"));
         menuGlobal.classList.remove("active");
 
@@ -507,22 +500,37 @@
 
         card.classList.add("dimmed");
         tarjetaActiva = nombre;
+        menuGlobal.dataset.agent = nombre; // <-- guardar agente activo también aquí
+
         menuGlobal.classList.add("active");
         menuGlobal.setAttribute("aria-hidden","false");
       });
     });
 
-    document.addEventListener("click", ()=>{
-      menuGlobal.classList.remove("active");
-      menuGlobal.setAttribute("aria-hidden","true");
-      document.querySelectorAll(".tarjeta").forEach(t=> t.classList.remove("dimmed"));
-      tarjetaActiva = null;
+    // Evitar que clicks dentro del menú radial cierren el menú
+    menuGlobal.addEventListener("click", (e) => e.stopPropagation());
+    menuGlobal.querySelectorAll("button").forEach(btn => {
+      btn.addEventListener("click", (e) => e.stopPropagation());
     });
 
-    // Acciones menú radial
-    menuGlobal.querySelector(".btn-libre").onclick = ()=> accionMenu(tarjetaActiva, null);
-    menuGlobal.querySelector(".btn-banio").onclick = ()=> accionMenu(tarjetaActiva, "baño");
-    menuGlobal.querySelector(".btn-almuerzo").onclick = ()=> accionMenu(tarjetaActiva, "almuerzo");
+    // Helper: obtener agente activo
+    function getAgenteActivo() {
+      return menuGlobal.dataset.agent || tarjetaActiva || null;
+    }
+
+    // Botones del menú radial
+    menuGlobal.querySelector(".btn-libre").onclick    = () => accionMenu(getAgenteActivo(), null);
+    menuGlobal.querySelector(".btn-banio").onclick    = () => accionMenu(getAgenteActivo(), "baño");
+    menuGlobal.querySelector(".btn-almuerzo").onclick = () => accionMenu(getAgenteActivo(), "almuerzo");
+
+    // Cerrar menú al hacer click fuera
+    document.addEventListener("click", () => {
+      menuGlobal.classList.remove("active");
+      menuGlobal.setAttribute("aria-hidden", "true");
+      document.querySelectorAll(".tarjeta").forEach(t => t.classList.remove("dimmed"));
+      tarjetaActiva = null;
+      delete menuGlobal.dataset.agent;
+    });
 
     async function accionMenu(nombre, tipo){
       if (!nombre) return;
@@ -562,6 +570,16 @@
           tiempoAlmuerzo: acAlmuerzo
         }
       }, { merge: true });
+
+      // feedback visual rápido
+      try {
+        const el = tarjetas[nombre]?.estado;
+        if (el) {
+          el.style.transition = "box-shadow .2s ease";
+          el.style.boxShadow = "0 0 0 3px rgba(96,165,250,.35)";
+          setTimeout(() => el.style.boxShadow = "", 300);
+        }
+      } catch {}
     }
 
     /* =========================
